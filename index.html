@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing 72 | Votre Landing Page Professionnelle en 72h</title>
-    <meta name="description" content="Landing pages professionnelles livrées en 72 heures. Design moderne, optimisé conversion. À partir de 490€.">
+    <title>Landing 72 | Votre site vitrine professionnel en 72h</title>
+    <meta name="description" content="Votre site vitrine professionnel livré en 72 heures. Design moderne, adapté mobile, visible sur Google. À partir de 490 €. On s'occupe de tout.">
+    
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%233b82f6'/%3E%3Ctext x='50' y='38' font-family='sans-serif' font-size='32' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3Ctext x='50' y='72' font-family='sans-serif' font-size='32' font-weight='bold' fill='white' text-anchor='middle'%3E72%3C/text%3E%3C/svg%3E">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18034224318"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-18034224318');
+    </script>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,6 +93,7 @@
             display: flex;
             gap: 2rem;
             list-style: none;
+            align-items: center;
         }
 
         .nav-links a {
@@ -92,6 +105,12 @@
 
         .nav-links a:hover {
             color: var(--text-primary);
+        }
+
+        .nav-phone {
+            color: var(--accent) !important;
+            font-weight: 600;
+            font-size: 0.9375rem;
         }
 
         .nav-cta {
@@ -118,9 +137,38 @@
             }
         }
 
+        /* Mobile phone bar */
+        .mobile-phone {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--accent);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .mobile-phone a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-phone {
+                display: block;
+            }
+            body {
+                padding-bottom: 60px;
+            }
+        }
+
         /* Hero Section */
         .hero {
-            padding: 10rem 0 6rem;
+            padding: 7rem 0 5rem;
             text-align: center;
         }
 
@@ -266,7 +314,7 @@
             margin: 0 auto;
         }
 
-        /* Why Landing Page Section */
+        /* Why Section */
         .why-section {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
@@ -340,6 +388,34 @@
             .why-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Ideal for section */
+        .ideal-section {
+            text-align: center;
+        }
+
+        .ideal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .ideal-tag {
+            padding: 0.625rem 1.25rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            transition: border-color 0.2s;
+        }
+
+        .ideal-tag:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
         }
 
         /* Services Section */
@@ -425,6 +501,7 @@
             border-radius: 100px;
             font-size: 0.75rem;
             font-weight: 600;
+            color: white;
         }
 
         .pricing-name {
@@ -1011,22 +1088,28 @@
         <div class="container nav-container">
             <div class="logo">Landing<span>72</span></div>
             <ul class="nav-links">
-                <li><a href="#why">Pourquoi une landing page</a></li>
+                <li><a href="#why">Pourquoi un site vitrine ?</a></li>
                 <li><a href="#pricing">Tarifs</a></li>
                 <li><a href="#faq">FAQ</a></li>
+                <li><a href="tel:+33756970770" class="nav-phone">📞 07 56 97 07 70</a></li>
             </ul>
-            <a href="#contact" class="nav-cta">Demander un devis</a>
+            <a href="#contact" class="nav-cta">Devis gratuit</a>
         </div>
     </nav>
+
+    <!-- Mobile phone bar -->
+    <div class="mobile-phone">
+        <a href="tel:+33756970770">📞 Appelez-nous : 07 56 97 07 70</a>
+    </div>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <div class="hero-badge">⚡ Livraison garantie en 72 heures</div>
-            <h1>Votre <span>Landing Page</span> professionnelle, livrée en 72h</h1>
-            <p class="hero-subtitle">Arrêtez de perdre des clients avec un site qui ne convertit pas. Obtenez une page de vente optimisée, moderne et efficace.</p>
+            <h1>Votre <span>site vitrine</span> professionnel, prêt en 72h</h1>
+            <p class="hero-subtitle">Vous n'avez pas encore de site ? Vos clients vous cherchent sur Google et ne vous trouvent pas. On crée votre site vitrine clé en main.</p>
             <div class="hero-cta">
-                <a href="#contact" class="btn-primary">Lancer mon projet →</a>
+                <a href="#contact" class="btn-primary">Recevoir mon devis gratuit →</a>
                 <a href="#pricing" class="btn-secondary">Voir les tarifs</a>
             </div>
             <div class="stats">
@@ -1036,7 +1119,7 @@
                 </div>
                 <div class="stat">
                     <div class="stat-value">100%</div>
-                    <div class="stat-label">Responsive mobile</div>
+                    <div class="stat-label">Adapté au téléphone</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">490€</div>
@@ -1046,39 +1129,64 @@
         </div>
     </section>
 
-    <!-- Why Landing Page Section -->
+    <!-- Why Section -->
     <section class="why-section" id="why">
         <div class="container">
             <div class="why-grid">
                 <div class="why-content">
-                    <h2>Pourquoi avez-vous besoin d'une landing page ?</h2>
-                    <p>Votre site vitrine parle de tout, mais ne vend rien. Une landing page, c'est une page avec un seul objectif : convertir vos visiteurs en clients ou en prospects qualifiés.</p>
-                    <p>Contrairement à un site classique où les visiteurs se perdent entre les menus et les pages, une landing page les guide vers une seule action : vous contacter, acheter, ou s'inscrire.</p>
+                    <h2>Pourquoi votre commerce a besoin d'un site vitrine</h2>
+                    <p>Aujourd'hui, la majorité de vos clients cherchent sur Google avant de se déplacer. Sans site, ils ne vous trouvent pas — et vont chez le concurrent.</p>
+                    <p>Un site vitrine professionnel vous donne de la crédibilité, même avant le premier contact. Il travaille pour vous 24h/24, même quand vous êtes fermé.</p>
                     <ul class="why-list">
-                        <li>Un message clair = plus de conversions</li>
-                        <li>Idéal pour vos campagnes publicitaires (Google, Facebook, Instagram)</li>
-                        <li>Mesurable : vous savez exactement ce qui fonctionne</li>
-                        <li>Rapide à mettre en place, sans refaire tout votre site</li>
+                        <li>Vos clients vous cherchent sur Google — soyez là quand ils cherchent</li>
+                        <li>Un site pro donne confiance avant même le premier appel</li>
+                        <li>Affichez vos horaires, vos services, votre adresse — tout au même endroit</li>
+                        <li>Recevez des demandes de devis 24h/24, même quand vous êtes fermé</li>
                     </ul>
                 </div>
                 <div class="why-stats">
                     <div class="why-stat-card">
-                        <div class="why-stat-value">+120%</div>
-                        <div class="why-stat-label">de conversions en moyenne</div>
+                        <div class="why-stat-value">97%</div>
+                        <div class="why-stat-label">des clients cherchent en ligne avant d'acheter</div>
                     </div>
                     <div class="why-stat-card">
                         <div class="why-stat-value">8 sec</div>
-                        <div class="why-stat-label">pour capter l'attention</div>
+                        <div class="why-stat-label">pour faire bonne impression</div>
                     </div>
                     <div class="why-stat-card">
                         <div class="why-stat-value">70%</div>
-                        <div class="why-stat-label">du trafic vient du mobile</div>
+                        <div class="why-stat-label">des visites viennent du téléphone</div>
                     </div>
                     <div class="why-stat-card">
-                        <div class="why-stat-value">1 page</div>
-                        <div class="why-stat-label">= 1 objectif clair</div>
+                        <div class="why-stat-value">24/7</div>
+                        <div class="why-stat-label">votre vitrine ouverte en permanence</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ideal for section -->
+    <section class="ideal-section">
+        <div class="container">
+            <div class="section-header">
+                <p class="section-tag">Pour qui ?</p>
+                <h2 class="section-title">Idéal pour les professionnels comme vous</h2>
+                <p class="section-subtitle">Que vous soyez artisan, commerçant ou indépendant, on crée le site qui vous correspond.</p>
+            </div>
+            <div class="ideal-tags">
+                <div class="ideal-tag">🔧 Artisans</div>
+                <div class="ideal-tag">✂️ Coiffeurs</div>
+                <div class="ideal-tag">🍕 Restaurants</div>
+                <div class="ideal-tag">🔌 Plombiers / Électriciens</div>
+                <div class="ideal-tag">💆 Thérapeutes</div>
+                <div class="ideal-tag">🏋️ Coachs sportifs</div>
+                <div class="ideal-tag">🏪 Commerces de proximité</div>
+                <div class="ideal-tag">📸 Photographes</div>
+                <div class="ideal-tag">⚖️ Avocats</div>
+                <div class="ideal-tag">🧮 Comptables</div>
+                <div class="ideal-tag">🚗 Auto-entrepreneurs</div>
+                <div class="ideal-tag">🍞 Boulangeries</div>
             </div>
         </div>
     </section>
@@ -1088,29 +1196,29 @@
         <div class="container">
             <div class="section-header">
                 <p class="section-tag">Ce qu'on vous livre</p>
-                <h2 class="section-title">Tout ce qu'il faut pour convertir</h2>
-                <p class="section-subtitle">Chaque landing page est conçue pour transformer vos visiteurs en clients.</p>
+                <h2 class="section-title">Tout est inclus, vous n'avez rien à faire</h2>
+                <p class="section-subtitle">On s'occupe de tout de A à Z. Vous nous donnez vos infos, on fait le reste.</p>
             </div>
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-icon">⚡</div>
-                    <h3>Livraison en 72h</h3>
-                    <p>Votre page est prête en 3 jours maximum. Pas de délai interminable, on avance vite.</p>
+                    <h3>Prêt en 72h</h3>
+                    <p>Votre site vitrine est en ligne en 3 jours maximum. Pas de délai interminable, on avance vite.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">📱</div>
-                    <h3>100% Responsive</h3>
-                    <p>Parfait sur mobile, tablette et desktop. Vos visiteurs convertissent sur tous les écrans.</p>
+                    <h3>Parfait sur téléphone</h3>
+                    <p>Votre site s'affiche parfaitement sur mobile, tablette et ordinateur. Vos clients pourront vous trouver depuis n'importe quel appareil.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">🎯</div>
-                    <h3>Optimisé conversion</h3>
-                    <p>Structure, textes, boutons : tout est pensé pour pousser vos visiteurs à l'action.</p>
+                    <h3>Pensé pour vos clients</h3>
+                    <p>Vos services, vos coordonnées, votre adresse : tout est clair et accessible. Vos clients trouvent ce qu'ils cherchent en quelques secondes.</p>
                 </div>
                 <div class="service-card">
                     <div class="service-icon">🔍</div>
-                    <h3>SEO technique</h3>
-                    <p>Code propre, balises optimisées, vitesse de chargement rapide. Google vous trouvera.</p>
+                    <h3>Visible sur Google</h3>
+                    <p>On fait le nécessaire pour que vos clients puissent vous trouver quand ils cherchent sur Google.</p>
                 </div>
             </div>
         </div>
@@ -1120,30 +1228,30 @@
     <section class="process">
         <div class="container">
             <div class="section-header">
-                <p class="section-tag">Comment ça marche</p>
-                <h2 class="section-title">4 étapes, 72 heures</h2>
-                <p class="section-subtitle">Un processus simple et efficace pour obtenir votre page rapidement.</p>
+                <p class="section-tag">Comment ça marche ?</p>
+                <h2 class="section-title">4 étapes, 72 heures, zéro stress</h2>
+                <p class="section-subtitle">Un processus simple. On vous guide à chaque étape.</p>
             </div>
             <div class="process-grid">
                 <div class="process-step">
                     <div class="process-number">1</div>
-                    <h3>Briefing</h3>
-                    <p>Vous nous envoyez votre projet via le formulaire</p>
+                    <h3>Vous nous contactez</h3>
+                    <p>Remplissez le formulaire en 2 minutes.</p>
                 </div>
                 <div class="process-step">
                     <div class="process-number">2</div>
-                    <h3>Échange</h3>
-                    <p>On discute de vos besoins et objectifs (15 min)</p>
+                    <h3>On en discute</h3>
+                    <p>15 minutes au téléphone pour comprendre votre activité.</p>
                 </div>
                 <div class="process-step">
                     <div class="process-number">3</div>
-                    <h3>Création</h3>
-                    <p>On conçoit et développe votre landing page</p>
+                    <h3>On crée votre site</h3>
+                    <p>On s'occupe de tout : textes, design, mise en ligne.</p>
                 </div>
                 <div class="process-step">
                     <div class="process-number">4</div>
-                    <h3>Livraison</h3>
-                    <p>Votre page est en ligne sous 72h</p>
+                    <h3>Votre site est en ligne</h3>
+                    <p>En 72h, vos clients peuvent vous trouver sur internet.</p>
                 </div>
             </div>
         </div>
@@ -1154,57 +1262,57 @@
         <div class="container">
             <div class="section-header">
                 <p class="section-tag">Tarifs</p>
-                <h2 class="section-title">Un pack pour chaque besoin</h2>
-                <p class="section-subtitle">Des formules claires, sans surprise. Vous savez ce que vous payez.</p>
+                <h2 class="section-title">Des tarifs clairs, sans surprise</h2>
+                <p class="section-subtitle">Vous savez ce que vous payez. Pas de frais cachés.</p>
             </div>
             <div class="pricing-grid">
-                <!-- Basic -->
+                <!-- Essentiel -->
                 <div class="pricing-card">
-                    <h3 class="pricing-name">Basic</h3>
-                    <p class="pricing-desc">L'essentiel pour démarrer</p>
+                    <h3 class="pricing-name">Essentiel</h3>
+                    <p class="pricing-desc">L'essentiel pour être présent en ligne</p>
                     <div class="pricing-price">
                         <div class="pricing-amount">490€</div>
                     </div>
                     <ul class="pricing-features">
-                        <li>1 Landing Page complète</li>
-                        <li>Design responsive (mobile, tablette, desktop)</li>
+                        <li>1 site vitrine complet (1 à 3 pages)</li>
+                        <li>Design professionnel adapté mobile</li>
                         <li>Livraison en 72h</li>
-                        <li>5 révisions incluses</li>
+                        <li>5 modifications incluses</li>
                         <li>Formulaire de contact intégré</li>
                     </ul>
-                    <a href="#contact" class="pricing-cta">Choisir Basic</a>
+                    <a href="#contact" class="pricing-cta">Choisir Essentiel</a>
                 </div>
                 <!-- Pro -->
                 <div class="pricing-card featured">
                     <h3 class="pricing-name">Pro</h3>
-                    <p class="pricing-desc">Pour performer sur le long terme</p>
+                    <p class="pricing-desc">Pour être visible sur Google durablement</p>
                     <div class="pricing-price">
                         <div class="pricing-amount">590€</div>
                     </div>
                     <ul class="pricing-features">
-                        <li>Tout le pack Basic</li>
-                        <li>Optimisation SEO avancée</li>
+                        <li>Tout le pack Essentiel</li>
+                        <li>Référencement Google optimisé</li>
                         <li>Hébergement inclus (3 ans)</li>
-                        <li>10 révisions incluses</li>
-                        <li>Analytics et tracking</li>
-                        <li>Support prioritaire</li>
+                        <li>10 modifications incluses</li>
+                        <li>Suivi des visites sur votre site</li>
+                        <li>Assistance prioritaire</li>
                     </ul>
                     <a href="#contact" class="pricing-cta">Choisir Pro</a>
                 </div>
-                <!-- Premium -->
+                <!-- Sur-Mesure -->
                 <div class="pricing-card">
-                    <h3 class="pricing-name">Premium</h3>
-                    <p class="pricing-desc">Solution complète sur-mesure</p>
+                    <h3 class="pricing-name">Sur-mesure</h3>
+                    <p class="pricing-desc">Un accompagnement complet pour votre activité</p>
                     <div class="pricing-price">
                         <div class="pricing-amount"><span>à partir de</span>1200€</div>
                     </div>
                     <ul class="pricing-features">
                         <li>Tout le pack Pro</li>
-                        <li>Stratégie digitale personnalisée</li>
-                        <li>Gestion des réseaux sociaux</li>
-                        <li>Campagnes publicitaires</li>
-                        <li>Accompagnement sur-mesure</li>
-                        <li>Révisions illimitées</li>
+                        <li>Accompagnement personnalisé</li>
+                        <li>Gestion de vos réseaux sociaux</li>
+                        <li>Publicité en ligne</li>
+                        <li>Suivi et conseils sur-mesure</li>
+                        <li>Modifications illimitées</li>
                     </ul>
                     <a href="#contact" class="pricing-cta">Demander un devis</a>
                 </div>
@@ -1217,32 +1325,32 @@
         <div class="container">
             <div class="section-header">
                 <p class="section-tag">FAQ</p>
-                <h2 class="section-title">Questions fréquentes</h2>
+                <h2 class="section-title">Vos questions, nos réponses</h2>
             </div>
             <div class="faq-grid">
                 <div class="faq-item">
-                    <h3 class="faq-question">C'est quoi exactement une landing page ?</h3>
-                    <p class="faq-answer">Une landing page est une page web autonome, conçue avec un seul objectif : convertir les visiteurs en prospects ou en clients. Contrairement à un site classique, elle n'a pas de menu ni de distractions.</p>
+                    <h3 class="faq-question">Je n'y connais rien en informatique, c'est grave ?</h3>
+                    <p class="faq-answer">Pas du tout ! On s'occupe de tout de A à Z. Vous nous donnez vos informations (services, horaires, coordonnées) et on fait le reste. Aucune compétence technique requise.</p>
                 </div>
                 <div class="faq-item">
-                    <h3 class="faq-question">Pourquoi 72 heures ?</h3>
-                    <p class="faq-answer">On a optimisé notre processus pour aller vite sans sacrifier la qualité. 72h c'est le temps qu'il nous faut pour créer une page efficace, la tester et la livrer prête à l'emploi.</p>
+                    <h3 class="faq-question">72h c'est vraiment possible ?</h3>
+                    <p class="faq-answer">Oui. On a optimisé notre méthode de travail pour aller vite sans sacrifier la qualité. Dès qu'on a vos informations et votre accord, on démarre immédiatement.</p>
                 </div>
                 <div class="faq-item">
-                    <h3 class="faq-question">J'ai déjà un site, j'ai quand même besoin d'une landing page ?</h3>
-                    <p class="faq-answer">Oui ! Votre site présente votre entreprise, mais une landing page est faite pour une action précise : lancer un produit, capter des emails, promouvoir une offre. C'est complémentaire.</p>
+                    <h3 class="faq-question">Est-ce que mon site sera visible sur Google ?</h3>
+                    <p class="faq-answer">Oui. On optimise votre site pour que vos clients puissent vous trouver quand ils cherchent votre type d'activité dans votre ville. Le pack Pro inclut un référencement plus poussé.</p>
                 </div>
                 <div class="faq-item">
-                    <h3 class="faq-question">Est-ce que je peux modifier ma page après ?</h3>
-                    <p class="faq-answer">Bien sûr. On vous livre le code source et vous êtes propriétaire de votre page. Si vous avez besoin de modifications, on peut aussi s'en occuper.</p>
+                    <h3 class="faq-question">Qu'est-ce qu'il me faut pour démarrer ?</h3>
+                    <p class="faq-answer">Très peu de choses : votre logo (si vous en avez un), vos horaires, la liste de vos services, et 15 minutes au téléphone avec nous. On s'occupe du reste.</p>
                 </div>
                 <div class="faq-item">
-                    <h3 class="faq-question">Qu'est-ce qui est inclus dans l'hébergement du pack Pro ?</h3>
-                    <p class="faq-answer">On héberge votre page pendant 3 ans sur nos serveurs rapides et sécurisés. Nom de domaine, certificat SSL (https), maintenance technique : tout est compris.</p>
+                    <h3 class="faq-question">Est-ce que je peux modifier mon site après ?</h3>
+                    <p class="faq-answer">Bien sûr. Vous êtes propriétaire de votre site. Si vous avez besoin de modifications, on peut s'en occuper rapidement.</p>
                 </div>
                 <div class="faq-item">
                     <h3 class="faq-question">Comment se passe le paiement ?</h3>
-                    <p class="faq-answer">50% à la commande, 50% à la livraison. Nous acceptons les virements bancaires. Vous recevez une facture pour chaque paiement.</p>
+                    <p class="faq-answer">C'est simple : 50% à la commande, 50% à la livraison. Vous recevez une facture pour chaque paiement. Paiement par virement ou carte bancaire.</p>
                 </div>
             </div>
         </div>
@@ -1253,51 +1361,56 @@
         <div class="container">
             <div class="contact-container">
                 <div class="contact-header">
-                    <h2>Lancez votre projet</h2>
-                    <p>Remplissez ce formulaire, on vous recontacte sous 24h</p>
+                    <h2>Recevez votre devis gratuit</h2>
+                    <p>Remplissez ce formulaire, on vous rappelle sous 24h</p>
                 </div>
                 
                 <form id="contactForm">
                     <div class="form-group">
                         <label class="form-label" for="name">Nom complet *</label>
-                        <input type="text" id="name" name="name" class="form-input" placeholder="John Doe" required>
+                        <input type="text" id="name" name="name" class="form-input" placeholder="Votre nom" required>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="email">Email *</label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="votre@email.com" required>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="phone">Téléphone</label>
-                        <input type="tel" id="phone" name="phone" class="form-input" placeholder="+33 6 12 34 56 78">
+                        <input type="tel" id="phone" name="phone" class="form-input" placeholder="06 12 34 56 78">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="pack">Pack souhaité *</label>
+                        <label class="form-label" for="activity">Votre activité *</label>
+                        <input type="text" id="activity" name="activity" class="form-input" placeholder="Ex : coiffeur, restaurant, plombier..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="pack">Formule souhaitée *</label>
                         <select id="pack" name="pack" class="form-input form-select" required>
-                            <option value="" disabled selected>Sélectionnez un pack</option>
-                            <option value="Basic - 490€">Basic - 490€</option>
+                            <option value="" disabled selected>Choisissez une formule</option>
+                            <option value="Essentiel - 490€">Essentiel - 490€</option>
                             <option value="Pro - 590€">Pro - 590€</option>
-                            <option value="Premium - Sur devis">Premium - Sur devis</option>
+                            <option value="Sur-mesure - Sur devis">Sur-mesure - Sur devis</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="message">Décrivez votre projet</label>
-                        <textarea id="message" name="message" class="form-input form-textarea" placeholder="Parlez-nous de votre activité et de vos objectifs..."></textarea>
+                        <label class="form-label" for="message">Un mot sur votre projet (optionnel)</label>
+                        <textarea id="message" name="message" class="form-input form-textarea" placeholder="Parlez-nous de votre activité..."></textarea>
                     </div>
                     
                     <button type="submit" class="form-submit" id="submitBtn">
-                        <span id="submitText">Envoyer ma demande</span>
+                        <span id="submitText">Recevoir mon devis gratuit</span>
                         <div class="spinner" id="submitSpinner" style="display: none;"></div>
                     </button>
                 </form>
                 
                 <div class="form-success" id="formSuccess">
                     <div class="form-success-icon">✓</div>
-                    <h3>Message envoyé !</h3>
-                    <p>Merci pour votre intérêt. Nous vous recontactons sous 24h.</p>
+                    <h3>Demande envoyée !</h3>
+                    <p>Merci pour votre confiance. On vous rappelle sous 24h pour discuter de votre projet.</p>
                 </div>
             </div>
         </div>
@@ -1309,34 +1422,34 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <div class="logo">Landing<span>72</span></div>
-                    <p>Des landing pages professionnelles livrées en 72 heures. Design moderne, optimisé conversion, sans prise de tête.</p>
+                    <p>Des sites vitrines professionnels livrés en 72 heures. Design moderne, adapté mobile, sans prise de tête.</p>
                 </div>
                 <div class="footer-column">
                     <h4>Navigation</h4>
                     <ul class="footer-links">
-                        <li><a href="#why">Pourquoi une landing page</a></li>
+                        <li><a href="#why">Pourquoi un site vitrine ?</a></li>
                         <li><a href="#pricing">Tarifs</a></li>
                         <li><a href="#faq">FAQ</a></li>
                         <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
-                    <h4>Nos packs</h4>
+                    <h4>Nos formules</h4>
                     <ul class="footer-links">
-                        <li><a href="#pricing">Basic - 490€</a></li>
+                        <li><a href="#pricing">Essentiel - 490€</a></li>
                         <li><a href="#pricing">Pro - 590€</a></li>
-                        <li><a href="#pricing">Premium - Sur devis</a></li>
+                        <li><a href="#pricing">Sur-mesure</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
                     <div class="footer-contact-item">📧 contact@landing72.fr</div>
-                    <div class="footer-contact-item">📱 +33 7 56 97 07 70</div>
+                    <div class="footer-contact-item">📱 07 56 97 07 70</div>
                     <div class="footer-contact-item">📍 France</div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p class="footer-copyright">© 2024 Landing72. Tous droits réservés.</p>
+                <p class="footer-copyright">© 2025 Landing72. Tous droits réservés.</p>
                 <div class="footer-legal">
                     <a onclick="openModal('mentions')">Mentions légales</a>
                     <a onclick="openModal('confidentialite')">Politique de confidentialité</a>
@@ -1417,7 +1530,8 @@
                     <li><strong>Nom complet</strong> : pour vous identifier et personnaliser nos échanges</li>
                     <li><strong>Adresse email</strong> : pour vous recontacter concernant votre demande</li>
                     <li><strong>Numéro de téléphone</strong> (optionnel) : pour vous joindre si nécessaire</li>
-                    <li><strong>Pack souhaité</strong> : pour comprendre votre besoin</li>
+                    <li><strong>Votre activité</strong> : pour comprendre votre besoin</li>
+                    <li><strong>Formule souhaitée</strong> : pour préparer votre devis</li>
                     <li><strong>Message / Description du projet</strong> : pour préparer notre échange</li>
                 </ul>
 
@@ -1482,30 +1596,30 @@
                 <p><em>Dernière mise à jour : Mars 2025</em></p>
 
                 <h3>Article 1 - Objet</h3>
-                <p>Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre Landing72 (ci-après "le Prestataire") et toute personne physique ou morale (ci-après "le Client") souhaitant bénéficier des services de création de landing pages.</p>
+                <p>Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre Landing72 (ci-après "le Prestataire") et toute personne physique ou morale (ci-après "le Client") souhaitant bénéficier des services de création de sites internet vitrine.</p>
                 <p>Toute commande implique l'acceptation sans réserve des présentes CGV.</p>
 
                 <h3>Article 2 - Services proposés</h3>
                 <table>
                     <tr>
-                        <th>Pack</th>
+                        <th>Formule</th>
                         <th>Prix</th>
                         <th>Inclus</th>
                     </tr>
                     <tr>
-                        <td>Basic</td>
+                        <td>Essentiel</td>
                         <td>490 €</td>
-                        <td>1 landing page, design responsive, livraison 72h, 5 révisions</td>
+                        <td>1 site vitrine (1-3 pages), design adapté mobile, livraison 72h, 5 modifications</td>
                     </tr>
                     <tr>
                         <td>Pro</td>
                         <td>590 €</td>
-                        <td>Pack Basic + SEO, hébergement 3 ans, 10 révisions, analytics</td>
+                        <td>Pack Essentiel + référencement Google, hébergement 3 ans, 10 modifications, suivi des visites</td>
                     </tr>
                     <tr>
-                        <td>Premium</td>
+                        <td>Sur-mesure</td>
                         <td>À partir de 1200 €</td>
-                        <td>Pack Pro + stratégie digitale, réseaux sociaux, révisions illimitées</td>
+                        <td>Pack Pro + accompagnement personnalisé, réseaux sociaux, modifications illimitées</td>
                     </tr>
                 </table>
 
@@ -1525,19 +1639,19 @@
                 <h3>Article 5 - Délais de livraison</h3>
                 <p>Le délai de livraison standard est de <strong>72 heures</strong> à compter de la réception de l'acompte, la validation du cahier des charges et la réception de tous les éléments nécessaires.</p>
 
-                <h3>Article 6 - Révisions</h3>
+                <h3>Article 6 - Modifications</h3>
                 <ul>
-                    <li>Basic : 5 révisions</li>
-                    <li>Pro : 10 révisions</li>
-                    <li>Premium : révisions illimitées</li>
+                    <li>Essentiel : 5 modifications</li>
+                    <li>Pro : 10 modifications</li>
+                    <li>Sur-mesure : modifications illimitées</li>
                 </ul>
                 <p>Les modifications majeures (refonte complète) feront l'objet d'un devis complémentaire.</p>
 
                 <h3>Article 7 - Propriété intellectuelle</h3>
-                <p>Après paiement intégral, le Client devient propriétaire du code source de sa landing page.</p>
+                <p>Après paiement intégral, le Client devient propriétaire du code source de son site vitrine.</p>
 
-                <h3>Article 8 - Hébergement (Pack Pro)</h3>
-                <p>Le pack Pro inclut l'hébergement pendant 3 ans : mise en ligne, certificat SSL (HTTPS), maintenance technique.</p>
+                <h3>Article 8 - Hébergement (Formule Pro)</h3>
+                <p>La formule Pro inclut l'hébergement pendant 3 ans : mise en ligne, certificat SSL (HTTPS), maintenance technique.</p>
 
                 <h3>Article 9 - Annulation et remboursement</h3>
                 <ul>
@@ -1561,7 +1675,7 @@
         // Google Sheets Configuration
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBcjo_hzt7y-KeXoZZDYZvD5yZtLVQ8VCCH52tznNMGm8rBo8ItDy1HqjjtoWDJ3r7UA/exec';
         
-        // Form submission
+        // Form submission with Google Ads conversion tracking
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1579,6 +1693,7 @@
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value,
+                activity: document.getElementById('activity').value,
                 pack: document.getElementById('pack').value,
                 message: document.getElementById('message').value
             };
@@ -1593,6 +1708,15 @@
                     body: JSON.stringify(formData)
                 });
                 
+                // Google Ads Conversion Tracking (clic sur soumission formulaire)
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'conversion', {
+                        'send_to': 'AW-18034224318/DbEtCLqjxY0cEL7ZsZdD',
+                        'value': 1.0,
+                        'currency': 'ILS'
+                    });
+                }
+                
                 form.style.display = 'none';
                 formSuccess.classList.add('show');
                 
@@ -1601,7 +1725,7 @@
                 alert('Une erreur est survenue. Veuillez réessayer.');
                 
                 submitBtn.disabled = false;
-                submitText.textContent = 'Envoyer ma demande';
+                submitText.textContent = 'Recevoir mon devis gratuit';
                 submitSpinner.style.display = 'none';
             }
         });
