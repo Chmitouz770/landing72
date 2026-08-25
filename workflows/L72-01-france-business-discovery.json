@@ -1,0 +1,175 @@
+{
+  "name": "L72 - 01 - France Business Discovery",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -112
+      ],
+      "id": "e6e5ad3e-7654-4a00-8e30-1cc5b960412b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.insee.fr/api-sirene/3.11/siret",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "periode(etatAdministratifEtablissement:A AND activitePrincipaleEtablissement:96.02A)"
+            },
+            {
+              "name": "nombre",
+              "value": "5"
+            },
+            {
+              "name": "date",
+              "value": "2026-08-25"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -192,
+        -112
+      ],
+      "id": "64d1537f-c78a-4fe9-aada-cd4181a7bd13",
+      "name": "Fetch SIRENE Establishments",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "3hshk0FzlFAGAqTm",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "etablissements",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -112
+      ],
+      "id": "718a28da-b4dc-4d75-8cf7-067d6eb7701c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2aa81de-b9cb-47a7-b6bf-6e46a766b55b",
+              "leftValue": "={{ $json.statutDiffusionEtablissement }}",
+              "rightValue": "O",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        256,
+        -112
+      ],
+      "id": "4b9bcd9d-b013-4f9a-a996-387046244695",
+      "name": "Filter Eligible Diffusion"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const e = item.json;\n  const ul = e.uniteLegale || {};\n  const p = (e.periodesEtablissement && e.periodesEtablissement[0]) || {};\n  const a = e.adresseEtablissement || {};\n\n  const tradeName =\n    p.enseigne1Etablissement ||\n    p.denominationUsuelleEtablissement ||\n    ul.denominationUsuelle1UniteLegale ||\n    null;\n\n  const personName = [\n    ul.prenom1UniteLegale,\n    ul.nomUniteLegale\n  ].filter(Boolean).join(' ');\n\n  const legalName =\n    ul.denominationUniteLegale ||\n    personName ||\n    tradeName ||\n    'Nom non renseigné';\n\n  return {\n    json: {\n      siren: e.siren,\n      siret: e.siret,\n\n      legal_name: legalName,\n      trade_name: tradeName,\n\n      country_code: 'FR',\n\n      registry_name: 'SIRENE',\n      registry_id: e.siret,\n      registry_diffusion_status: e.statutDiffusionEtablissement,\n\n      activity_code:\n        p.activitePrincipaleEtablissement ||\n        e.activitePrincipaleNAF25Etablissement ||\n        null,\n\n      creation_date: e.dateCreationEtablissement || null,\n      employee_range: e.trancheEffectifsEtablissement || null,\n\n      business_status: 'active',\n\n      has_website: null,\n\n      official_address: {\n        street_number: a.numeroVoieEtablissement || null,\n        street_type: a.typeVoieEtablissement || null,\n        street_name: a.libelleVoieEtablissement || null,\n        postal_code: a.codePostalEtablissement || null,\n        city: a.libelleCommuneEtablissement || null,\n        country: 'France'\n      }\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "23c27874-1fa8-4f37-8060-77b2c271b925",
+      "name": "Normalize SIRENE Business"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Fetch SIRENE Establishments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch SIRENE Establishments": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Filter Eligible Diffusion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Eligible Diffusion": {
+      "main": [
+        [
+          {
+            "node": "Normalize SIRENE Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fe4e15e8-8343-4f99-a5f6-f4c9a51d0839",
+  "meta": {
+    "instanceId": "ad301165cb5cd711b5875d2e9bab75d279f3e518e0667c702e40a7ce44394cc3"
+  },
+  "nodeGroups": [],
+  "id": "pHAQwFQ1nSljDsBs",
+  "tags": []
+}
