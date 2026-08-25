@@ -1,0 +1,283 @@
+{
+  "name": "L72 - 00 - Database Smoke Test",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -192
+      ],
+      "id": "1014079d-960b-47d5-9104-d74a5ce126e0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"legal_name\": \"Bella Coiffure Test n8n\",\n  \"trade_name\": \"Bella Coiffure\",\n  \"country_code\": \"FR\",\n  \"registry_name\": \"TEST_N8N\",\n  \"activity_code\": \"9602A\",\n  \"activity_label\": \"Coiffure\",\n  \"business_status\": \"active\",\n  \"has_website\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -272,
+        -192
+      ],
+      "id": "a27a08eb-263d-44d2-9cba-498bb84bbf34",
+      "name": "Prepare Test Business"
+    },
+    {
+      "parameters": {
+        "tableId": "businesses",
+        "dataToSend": "autoMapInputData"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -192
+      ],
+      "id": "2ba1ad7c-c959-4a13-88ca-df31757b1c9c",
+      "name": "Create Business",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "prospects",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "business_id",
+              "fieldValue": "={{ $('Create Business').item.json.id }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "DISCOVERED"
+            },
+            {
+              "fieldId": "score",
+              "fieldValue": "8.5"
+            },
+            {
+              "fieldId": "target_country",
+              "fieldValue": "FR"
+            },
+            {
+              "fieldId": "target_city",
+              "fieldValue": "Lyon"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "coiffure"
+            },
+            {
+              "fieldId": "offer_price_cents",
+              "fieldValue": "149000"
+            },
+            {
+              "fieldId": "offer_currency",
+              "fieldValue": "EUR"
+            },
+            {
+              "fieldId": "marketing_eligible",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "do_not_contact",
+              "fieldValue": "false"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -192
+      ],
+      "id": "35d27a9f-0d9b-44bc-a52f-7494201f1bef",
+      "name": "Create Prospect",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "workflow_runs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "workflow_name",
+              "fieldValue": "L72 - 00 - Database Smoke Test"
+            },
+            {
+              "fieldId": "workflow_version",
+              "fieldValue": "1.0"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "SUCCESS"
+            },
+            {
+              "fieldId": "input_count",
+              "fieldValue": "1"
+            },
+            {
+              "fieldId": "output_count",
+              "fieldValue": "1"
+            },
+            {
+              "fieldId": "error_count",
+              "fieldValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -192
+      ],
+      "id": "046009a6-5abe-4835-98c9-d2a28dc74c79",
+      "name": "Create Workflow Run",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "event_log",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "business_id",
+              "fieldValue": "={{ $('Create Business').item.json.id }}"
+            },
+            {
+              "fieldId": "prospect_id",
+              "fieldValue": "={{ $('Create Prospect').item.json.id }}"
+            },
+            {
+              "fieldId": "workflow_run_id",
+              "fieldValue": "={{ $('Create Workflow Run').item.json.id }}"
+            },
+            {
+              "fieldId": "event_type",
+              "fieldValue": "PROSPECT_DISCOVERED"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "N8N_SMOKE_TEST"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "SUCCESS"
+            },
+            {
+              "fieldId": "cost_usd",
+              "fieldValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -192
+      ],
+      "id": "ac16b6d5-3e10-49b9-bed4-ef9082cf5304",
+      "name": "Create Event Log",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Prepare Test Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Test Business": {
+      "main": [
+        [
+          {
+            "node": "Create Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Business": {
+      "main": [
+        [
+          {
+            "node": "Create Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Prospect": {
+      "main": [
+        [
+          {
+            "node": "Create Workflow Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Workflow Run": {
+      "main": [
+        [
+          {
+            "node": "Create Event Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c2489687-a674-4961-9367-4dd40c9d174f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad301165cb5cd711b5875d2e9bab75d279f3e518e0667c702e40a7ce44394cc3"
+  },
+  "nodeGroups": [],
+  "id": "x7ugRBOdA3EalUhr",
+  "tags": []
+}
