@@ -39,7 +39,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        -192,
+        32,
         -112
       ],
       "id": "64d1537f-c78a-4fe9-aada-cd4181a7bd13",
@@ -59,7 +59,7 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        32,
+        256,
         -112
       ],
       "id": "718a28da-b4dc-4d75-8cf7-067d6eb7701c",
@@ -93,7 +93,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        256,
+        480,
         -112
       ],
       "id": "4b9bcd9d-b013-4f9a-a996-387046244695",
@@ -106,11 +106,236 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
+        704,
         -112
       ],
       "id": "23c27874-1fa8-4f37-8060-77b2c271b925",
       "name": "Normalize SIRENE Business"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hwzpenryololztujtpgr.supabase.co/rest/v1/rpc/upsert_business",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { payload: $json } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        928,
+        -112
+      ],
+      "id": "f58e920b-304e-4696-8f1a-3f81e8332cb4",
+      "name": "Upsert Business",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const b = item.json;\n\n  return {\n    json: {\n      business_id: b.id,\n      status: 'DISCOVERED',\n\n      // Pas encore scoré : on n'a pas vérifié\n      // le site, les avis ou les contacts.\n      score: 0,\n\n      target_country: b.country_code || 'FR',\n      target_city: b.official_address?.city || null,\n\n      category: 'coiffure',\n\n      // On ne sait pas encore si on peut/profite de le contacter.\n      marketing_eligible: null,\n\n      offer_price_cents: 149000,\n      offer_currency: 'EUR'\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        -112
+      ],
+      "id": "ddaf1e7c-b692-43f2-8aad-116eb8fe4068",
+      "name": "Prepare Prospect"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hwzpenryololztujtpgr.supabase.co/rest/v1/rpc/upsert_prospect",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { payload: $json } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1376,
+        -112
+      ],
+      "id": "39b17339-e8c3-4291-904c-df5ffd6d826b",
+      "name": "Upsert Prospect",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "workflow_runs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "external_run_id",
+              "fieldValue": "={{ $execution.id }}"
+            },
+            {
+              "fieldId": "workflow_name",
+              "fieldValue": "L72 - 01 - France Business Discovery"
+            },
+            {
+              "fieldId": "workflow_version",
+              "fieldValue": "1.0"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "RUNNING"
+            },
+            {
+              "fieldId": "input_count",
+              "fieldValue": "1"
+            },
+            {
+              "fieldId": "error_count",
+              "fieldValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -112
+      ],
+      "id": "01f011bb-6e9b-4536-a708-b4e51227d056",
+      "name": "Create Workflow Run",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "event_log",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "business_id",
+              "fieldValue": "={{ $json.business_id }}"
+            },
+            {
+              "fieldId": "prospect_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "workflow_run_id",
+              "fieldValue": "={{ $('Create Workflow Run').item.json.id }}"
+            },
+            {
+              "fieldId": "event_type",
+              "fieldValue": "PROSPECT_DISCOVERED"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "SIRENE"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "SUCCESS"
+            },
+            {
+              "fieldId": "cost_usd",
+              "fieldValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -112
+      ],
+      "id": "3f654210-0eb7-4a8e-8f7f-e9bd3eea5021",
+      "name": "Log Prospect Discovered",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn [\n  {\n    json: {\n      run_id: $('Create Workflow Run').first().json.id,\n      status: 'SUCCESS',\n      output_count: items.length,\n      error_count: 0,\n      finished_at: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        -112
+      ],
+      "id": "58fe5cb6-2719-4147-a9d6-5508a663a9ec",
+      "name": "Prepare Run Summary"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "workflow_runs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.run_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "output_count",
+              "fieldValue": "={{ $json.output_count }}"
+            },
+            {
+              "fieldId": "error_count",
+              "fieldValue": "={{ $json.error_count }}"
+            },
+            {
+              "fieldId": "finished_at",
+              "fieldValue": "={{ $json.finished_at }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -112
+      ],
+      "id": "6afcd820-1b92-4f6c-98c5-f67505105be2",
+      "name": "Complete Workflow Run",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -119,7 +344,7 @@
       "main": [
         [
           {
-            "node": "Fetch SIRENE Establishments",
+            "node": "Create Workflow Run",
             "type": "main",
             "index": 0
           }
@@ -158,6 +383,83 @@
           }
         ]
       ]
+    },
+    "Normalize SIRENE Business": {
+      "main": [
+        [
+          {
+            "node": "Upsert Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Business": {
+      "main": [
+        [
+          {
+            "node": "Prepare Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Prospect": {
+      "main": [
+        [
+          {
+            "node": "Upsert Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Workflow Run": {
+      "main": [
+        [
+          {
+            "node": "Fetch SIRENE Establishments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Prospect": {
+      "main": [
+        [
+          {
+            "node": "Log Prospect Discovered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Prospect Discovered": {
+      "main": [
+        [
+          {
+            "node": "Prepare Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Run Summary": {
+      "main": [
+        [
+          {
+            "node": "Complete Workflow Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -165,8 +467,9 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "fe4e15e8-8343-4f99-a5f6-f4c9a51d0839",
+  "versionId": "51644842-e4e3-4b06-91e3-931d331623c2",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "ad301165cb5cd711b5875d2e9bab75d279f3e518e0667c702e40a7ce44394cc3"
   },
   "nodeGroups": [],
