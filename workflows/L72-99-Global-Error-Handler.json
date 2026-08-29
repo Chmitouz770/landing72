@@ -1,0 +1,92 @@
+{
+  "name": "L72 - 99 - Global Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a690718f-3312-43af-9b5a-b72f116f2416",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const event = item.json;\n\n  const execution = event.execution || {};\n  const workflow = event.workflow || {};\n  const error = execution.error || event.error || {};\n\n  return {\n    json: {\n      external_run_id: execution.id\n        ? String(execution.id)\n        : null,\n\n      workflow_id: workflow.id || null,\n      workflow_name: workflow.name || null,\n\n      error_message:\n        error.message ||\n        event.message ||\n        'Unknown n8n error',\n\n      error_stack: error.stack || null,\n\n      last_node:\n        error.lastNodeExecuted ||\n        execution.lastNodeExecuted ||\n        null,\n\n      execution_url:\n        execution.url || null,\n\n      execution_mode:\n        execution.mode || null,\n\n      failed_at:\n        new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "96a613fa-78fb-4f26-bd19-cff136ddd61e",
+      "name": "Prepare Error Context"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hwzpenryololztujtpgr.supabase.co/rest/v1/rpc/fail_workflow_run",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { payload: $json } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a870210a-f9b6-4c79-895a-947fbc09e17d",
+      "name": "Fail Workflow Run",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Error Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Error Context": {
+      "main": [
+        [
+          {
+            "node": "Fail Workflow Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1a024341-63b1-4dce-98aa-397e1dfa63f3",
+  "meta": {
+    "instanceId": "ad301165cb5cd711b5875d2e9bab75d279f3e518e0667c702e40a7ce44394cc3"
+  },
+  "nodeGroups": [],
+  "id": "YORtUxpxSidKsWqs",
+  "tags": []
+}

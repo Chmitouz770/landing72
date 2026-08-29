@@ -1,0 +1,467 @@
+{
+  "name": "L72 - 02 - Website Detection",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -128
+      ],
+      "id": "ff26861c-6cc2-4aa6-bfa6-fe22a5f8c9d6",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "businesses",
+        "limit": 5,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "website_detection_status",
+              "condition": "eq",
+              "keyValue": "PENDING"
+            },
+            {
+              "keyName": "business_status",
+              "condition": "eq",
+              "keyValue": "active"
+            },
+            {
+              "keyName": "registry_name",
+              "condition": "eq",
+              "keyValue": "SIRENE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -128
+      ],
+      "id": "871d108d-60bf-4018-9f78-f8e002392c00",
+      "name": "Get Businesses To Check",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const b = item.json;\n  const a = b.official_address || {};\n\n  const businessName =\n    b.trade_name ||\n    b.legal_name ||\n    '';\n\n  const location = [\n    a.postal_code,\n    a.city\n  ].filter(Boolean).join(' ');\n\n  const searchQuery =\n    `\"${businessName}\" ${location}`.trim();\n\n  return {\n    json: {\n      ...b,\n      search_query: searchQuery\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -128
+      ],
+      "id": "1dba9cbb-44a7-42d7-bf55-9c6898658536",
+      "name": "Prepare Search Query"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    q: $json.search_query,\n    hl: \"fr\",\n    gl: \"fr\",\n    num: 10\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        288,
+        -128
+      ],
+      "id": "c7e0e6c2-4fb4-4bcd-963c-c3e89dd4a9ec",
+      "name": "Search Website with Serper",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "kt1I72dEJEt3F1zc",
+          "name": "Serper API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const searchResults = $input.all();\nconst businesses = $('Prepare Search Query').all();\n\nconst THIRD_PARTY_DOMAINS = [\n  // Registres / informations entreprises\n  'societe.com',\n  'pappers.fr',\n  'verif.com',\n  'manageo.fr',\n  'entreprises.lefigaro.fr',\n  'annuaire-entreprises.data.gouv.fr',\n  'infonet.fr',\n  'dataprospects.fr',\n\n  // Annuaires\n  'annuairelocal.fr',\n  'annuairefrancais.fr',\n  'saloncoiffure.net',\n  'unboncoiffeur.fr',\n  'telephone.city',\n  'sectorama.fr',\n  'eterritoire.fr',\n  'guadeloupe.net',\n  'icigwada.com',\n  'pagesjaunes.fr',\n  '118000.fr',\n  'villepratique.fr',\n  'meilleurcoiffeur.com',\n  'alentoor.fr',\n  'capistars.fr',\n  'complete-tes-commerces.fr',\n  'en-ligne.me',\n  'siteartisan.fr',\n  'mapcarta.com',\n\n  // Réservation / plateformes métier\n  'nrdv.fr',\n  'planity.com',\n  'treatwell.fr',\n  'booksy.com',\n  'fresha.com',\n  'salonkee.fr',\n  'labonnealternance.apprentissage.beta.gouv.fr',\n\n  // Réseaux sociaux\n  'facebook.com',\n  'instagram.com',\n  'linkedin.com',\n  'tiktok.com',\n  'twitter.com',\n  'x.com',\n\n  // Autres plateformes\n  'tripadvisor.fr',\n  'tripadvisor.com',\n  'yelp.fr',\n  'yelp.com',\n  'google.com',\n  'google.fr'\n];\n\nfunction getHostname(url = '') {\n  const value = String(url).trim();\n\n  const match = value.match(/^https?:\\/\\/([^\\/?#]+)/i);\n\n  if (!match) {\n    return '';\n  }\n\n  return match[1]\n    .toLowerCase()\n    .replace(/^www\\./, '')\n    .split(':')[0];\n}\n\nfunction isThirdParty(url) {\n  const host = getHostname(url);\n\n  if (!host) {\n    return true;\n  }\n\n  return THIRD_PARTY_DOMAINS.some(domain =>\n    host === domain ||\n    host.endsWith('.' + domain)\n  );\n}\n\nfunction normalize(text = '') {\n  return String(text)\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]/g, '');\n}\n\nfunction getTokens(text = '') {\n  return String(text)\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim()\n    .split(/\\s+/)\n    .filter(token => token.length >= 4);\n}\n\nreturn searchResults.map((item, index) => {\n\n  const response = item.json;\n  const business = businesses[index]?.json || {};\n\n  const businessName =\n    business.trade_name ||\n    business.legal_name ||\n    '';\n\n  const city =\n    business.official_address?.city ||\n    '';\n\n  const businessTokens = getTokens(businessName);\n  const normalizedCity = normalize(city);\n\n  const organic = Array.isArray(response.organic)\n    ? response.organic\n    : [];\n\n  const evidenceResults = organic.slice(0, 10).map(result => {\n    const host = getHostname(result.link);\n\n    const hostNormalized = normalize(host);\n\n    const hostLooksBranded =\n      businessTokens.some(token =>\n        hostNormalized.includes(token)\n      );\n\n    return {\n      position: result.position ?? null,\n      title: result.title ?? null,\n      link: result.link ?? null,\n      host,\n      is_third_party: isThirdParty(result.link),\n      host_looks_branded: hostLooksBranded,\n      snippet: result.snippet ?? null\n    };\n  });\n\n  let candidate = null;\n\n  // ------------------------------------------------\n  // 1. WEBSITE FOURNI DIRECTEMENT PAR GOOGLE\n  // ------------------------------------------------\n\n  const kgWebsite =\n    response.knowledgeGraph?.website || null;\n\n  if (\n    kgWebsite &&\n    !isThirdParty(kgWebsite)\n  ) {\n    candidate = {\n      url: kgWebsite,\n      host: getHostname(kgWebsite),\n      reason: 'KNOWLEDGE_GRAPH_OWNED_WEBSITE',\n      confidence: 0.97\n    };\n  }\n\n  // ------------------------------------------------\n  // 2. RESULTATS ORGANIQUES\n  // ------------------------------------------------\n\n  if (!candidate) {\n\n    for (const result of organic) {\n\n      if (!result.link) {\n        continue;\n      }\n\n      // Annuaire / plateforme = jamais site propriétaire\n      if (isThirdParty(result.link)) {\n        continue;\n      }\n\n      const host = getHostname(result.link);\n      const hostNormalized = normalize(host);\n\n      const hostLooksBranded =\n        businessTokens.some(token =>\n          hostNormalized.includes(token)\n        );\n\n      // Le domaine lui-même doit ressembler au nom du commerce.\n      // Cela évite qu'un nouvel annuaire inconnu devienne HAS_WEBSITE.\n      if (!hostLooksBranded) {\n        continue;\n      }\n\n      const text = normalize(\n        `${result.title || ''} ${result.snippet || ''}`\n      );\n\n      const matchingBusinessTokens =\n        businessTokens.filter(token =>\n          text.includes(token)\n        ).length;\n\n      const businessMatches =\n        matchingBusinessTokens >= 1;\n\n      const cityMatches =\n        normalizedCity &&\n        text.includes(normalizedCity);\n\n      if (\n        businessMatches &&\n        cityMatches\n      ) {\n        candidate = {\n          url: result.link,\n          host,\n          reason: 'BRANDED_DOMAIN_NAME_AND_CITY_MATCH',\n          confidence: 0.92\n        };\n\n        break;\n      }\n    }\n  }\n\n  // ------------------------------------------------\n  // SITE PROPRIETAIRE VRAIMENT TROUVE\n  // ------------------------------------------------\n\n  if (candidate) {\n    return {\n      json: {\n        business_id: business.id,\n        legal_name: business.legal_name,\n        trade_name: business.trade_name,\n        city,\n\n        website_detection_status: 'HAS_WEBSITE',\n        has_website: true,\n        website_url: candidate.url,\n        website_detection_confidence:\n          candidate.confidence,\n\n        website_evidence: {\n          query: business.search_query,\n          detection_reason: candidate.reason,\n          detected_host: candidate.host,\n          top_results: evidenceResults\n        }\n      }\n    };\n  }\n\n  // ------------------------------------------------\n  // SINON : DEUXIEME PASSE OBLIGATOIRE\n  // ------------------------------------------------\n\n  return {\n    json: {\n      business_id: business.id,\n      legal_name: business.legal_name,\n      trade_name: business.trade_name,\n      city,\n\n      website_detection_status: 'UNCERTAIN',\n      has_website: null,\n      website_url: null,\n      website_detection_confidence: 0.40,\n\n      website_evidence: {\n        query: business.search_query,\n        detection_reason:\n          'NO_CONFIRMED_OWNED_WEBSITE_FIRST_PASS',\n        top_results: evidenceResults\n      }\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -128
+      ],
+      "id": "8a432d73-6aeb-4421-8cd8-c6040cc95e4f",
+      "name": "Analyze Website Results"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "businesses",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.business_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "website_detection_status",
+              "fieldValue": "={{ $json.website_detection_status }}"
+            },
+            {
+              "fieldId": "has_website",
+              "fieldValue": "={{ $json.has_website }}"
+            },
+            {
+              "fieldId": "website_url",
+              "fieldValue": "={{ $json.website_url }}"
+            },
+            {
+              "fieldId": "website_detection_confidence",
+              "fieldValue": "={{ $json.website_detection_confidence }}"
+            },
+            {
+              "fieldId": "website_checked_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "website_evidence",
+              "fieldValue": "={{ $json.website_evidence }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -128
+      ],
+      "id": "4a52dc17-9902-444d-b6ad-0adb801afbec",
+      "name": "Save Website Detection",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all()\n  .filter(item => item.json.website_detection_status === 'UNCERTAIN')\n  .map(item => {\n    const b = item.json;\n    const a = b.official_address || {};\n\n    const name =\n      b.trade_name ||\n      b.legal_name ||\n      '';\n\n    const city = a.city || '';\n    const postalCode = a.postal_code || '';\n    const street = [\n      a.street_number,\n      a.street_type,\n      a.street_name\n    ].filter(Boolean).join(' ');\n\n    const deepSearchQuery =\n      `\"${name}\" coiffure \"${city}\" \"${street}\" site officiel`;\n\n    return {\n      json: {\n        ...b,\n        deep_search_query: deepSearchQuery\n      }\n    };\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        112
+      ],
+      "id": "9b736ce4-7a30-41bb-a8c7-0822766b1f5b",
+      "name": "Prepare Deep Search Query",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    q: $json.deep_search_query,\n    hl: \"fr\",\n    gl: \"fr\",\n    num: 10\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        320,
+        112
+      ],
+      "id": "c0af9f4e-b89e-4d1c-8e7c-0582e94ae0a6",
+      "name": "Deep Search Website with Serper",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "kt1I72dEJEt3F1zc",
+          "name": "Serper API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const searchResults = $input.all();\nconst businesses = $('Prepare Deep Search Query').all();\n\nconst THIRD_PARTY_DOMAINS = [\n  // Entreprises / registres\n  'societe.com',\n  'pappers.fr',\n  'verif.com',\n  'manageo.fr',\n  'entreprises.lefigaro.fr',\n  'annuaire-entreprises.data.gouv.fr',\n  'infonet.fr',\n  'dataprospects.fr',\n  'fichesociete.fr',\n  'societeinfo.com',\n\n  // Annuaires\n  'annuairelocal.fr',\n  'annuairefrancais.fr',\n  'saloncoiffure.net',\n  'unboncoiffeur.fr',\n  'telephone.city',\n  'sectorama.fr',\n  'eterritoire.fr',\n  'guadeloupe.net',\n  'icigwada.com',\n  'pagesjaunes.fr',\n  '118000.fr',\n  'villepratique.fr',\n  'meilleurcoiffeur.com',\n  'alentoor.fr',\n  'capistars.fr',\n  'complete-tes-commerces.fr',\n  'en-ligne.me',\n  'siteartisan.fr',\n  'mapcarta.com',\n  'tel.fr',\n\n  // Réservation / plateformes\n  'nrdv.fr',\n  'planity.com',\n  'treatwell.fr',\n  'booksy.com',\n  'fresha.com',\n  'salonkee.fr',\n  'labonnealternance.apprentissage.beta.gouv.fr',\n\n  // Réseaux sociaux\n  'facebook.com',\n  'instagram.com',\n  'linkedin.com',\n  'tiktok.com',\n  'twitter.com',\n  'x.com',\n\n  // Divers\n  'tripadvisor.fr',\n  'tripadvisor.com',\n  'yelp.fr',\n  'yelp.com',\n  'google.com',\n  'google.fr'\n];\n\nfunction getHostname(url = '') {\n  const value = String(url).trim();\n  const match = value.match(/^https?:\\/\\/([^\\/?#]+)/i);\n\n  if (!match) return '';\n\n  return match[1]\n    .toLowerCase()\n    .replace(/^www\\./, '')\n    .split(':')[0];\n}\n\nfunction normalize(text = '') {\n  return String(text)\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]/g, '');\n}\n\nfunction getTokens(text = '') {\n  return String(text)\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, ' ')\n    .trim()\n    .split(/\\s+/)\n    .filter(token => token.length >= 4);\n}\n\nfunction isThirdParty(url) {\n  const host = getHostname(url);\n\n  if (!host) return true;\n\n  return THIRD_PARTY_DOMAINS.some(domain =>\n    host === domain ||\n    host.endsWith('.' + domain)\n  );\n}\n\nreturn searchResults.map((item, index) => {\n\n  const response = item.json;\n  const business = businesses[index]?.json || {};\n\n  const businessName =\n    business.trade_name ||\n    business.legal_name ||\n    '';\n\n  const city =\n    business.official_address?.city ||\n    business.city ||\n    '';\n\n  const businessTokens = getTokens(businessName);\n  const normalizedCity = normalize(city);\n\n  const organic = Array.isArray(response.organic)\n    ? response.organic\n    : [];\n\n  let ownedWebsite = null;\n  let unknownRelevantResults = 0;\n  let matchingThirdPartyResults = 0;\n\n  const evidence = organic.slice(0, 10).map(result => {\n\n    const host = getHostname(result.link);\n    const hostNormalized = normalize(host);\n\n    const hostLooksBranded =\n      businessTokens.some(token =>\n        hostNormalized.includes(token)\n      );\n\n    return {\n      position: result.position ?? null,\n      title: result.title ?? null,\n      link: result.link ?? null,\n      host,\n      is_third_party: isThirdParty(result.link),\n      host_looks_branded: hostLooksBranded,\n      snippet: result.snippet ?? null\n    };\n  });\n\n  // --------------------------------------------------\n  // 1. KNOWLEDGE GRAPH\n  // --------------------------------------------------\n\n  const kgWebsite =\n    response.knowledgeGraph?.website || null;\n\n  if (\n    kgWebsite &&\n    !isThirdParty(kgWebsite)\n  ) {\n    ownedWebsite = {\n      url: kgWebsite,\n      host: getHostname(kgWebsite),\n      reason: 'KNOWLEDGE_GRAPH_OWNED_WEBSITE',\n      confidence: 0.97\n    };\n  }\n\n  // --------------------------------------------------\n  // 2. RESULTATS ORGANIQUES\n  // --------------------------------------------------\n\n  if (!ownedWebsite) {\n\n    for (const result of organic) {\n\n      if (!result.link) continue;\n\n      const host = getHostname(result.link);\n      const hostNormalized = normalize(host);\n\n      const text = normalize(\n        `${result.title || ''} ${result.snippet || ''}`\n      );\n\n      const matchingTokens =\n        businessTokens.filter(token =>\n          text.includes(token)\n        ).length;\n\n      const businessMatches =\n        matchingTokens >= 1;\n\n      const cityMatches =\n        normalizedCity &&\n        text.includes(normalizedCity);\n\n      const relevant =\n        businessMatches &&\n        cityMatches;\n\n      if (!relevant) {\n        continue;\n      }\n\n      // Annuaire connu\n      if (isThirdParty(result.link)) {\n        matchingThirdPartyResults++;\n        continue;\n      }\n\n      const hostLooksBranded =\n        businessTokens.some(token =>\n          hostNormalized.includes(token)\n        );\n\n      // Domaine inconnu mais qui ne ressemble pas au commerce :\n      // on ne le considère PAS comme site officiel.\n      if (!hostLooksBranded) {\n        unknownRelevantResults++;\n        continue;\n      }\n\n      // Là seulement on accepte le site.\n      ownedWebsite = {\n        url: result.link,\n        host,\n        reason: 'BRANDED_DOMAIN_NAME_AND_CITY_MATCH',\n        confidence: 0.92\n      };\n\n      break;\n    }\n  }\n\n  // --------------------------------------------------\n  // HAS WEBSITE\n  // --------------------------------------------------\n\n  if (ownedWebsite) {\n    return {\n      json: {\n        business_id: business.id,\n        legal_name: business.legal_name,\n        trade_name: business.trade_name,\n        city,\n\n        website_detection_status: 'HAS_WEBSITE',\n        has_website: true,\n        website_url: ownedWebsite.url,\n        website_detection_confidence:\n          ownedWebsite.confidence,\n\n        website_evidence: {\n          first_pass:\n            business.website_evidence || null,\n\n          deep_pass: {\n            query: business.deep_search_query,\n            detection_reason:\n              ownedWebsite.reason,\n            detected_host:\n              ownedWebsite.host,\n            results: evidence\n          }\n        }\n      }\n    };\n  }\n\n  // --------------------------------------------------\n  // DOMAINE INCONNU : ON RESTE PRUDENT\n  // --------------------------------------------------\n\n  if (unknownRelevantResults > 0) {\n    return {\n      json: {\n        business_id: business.id,\n        legal_name: business.legal_name,\n        trade_name: business.trade_name,\n        city,\n\n        website_detection_status: 'UNCERTAIN',\n        has_website: null,\n        website_url: null,\n        website_detection_confidence: 0.60,\n\n        website_evidence: {\n          first_pass:\n            business.website_evidence || null,\n\n          deep_pass: {\n            query: business.deep_search_query,\n            detection_reason:\n              'UNVERIFIED_NON_BRANDED_DOMAIN_FOUND',\n            unknown_relevant_results:\n              unknownRelevantResults,\n            matching_third_party_results:\n              matchingThirdPartyResults,\n            results: evidence\n          }\n        }\n      }\n    };\n  }\n\n  // --------------------------------------------------\n  // NO WEBSITE\n  // --------------------------------------------------\n\n  if (matchingThirdPartyResults >= 2) {\n    return {\n      json: {\n        business_id: business.id,\n        legal_name: business.legal_name,\n        trade_name: business.trade_name,\n        city,\n\n        website_detection_status: 'NO_WEBSITE',\n        has_website: false,\n        website_url: null,\n        website_detection_confidence: 0.85,\n\n        website_evidence: {\n          first_pass:\n            business.website_evidence || null,\n\n          deep_pass: {\n            query: business.deep_search_query,\n            detection_reason:\n              'ONLY_THIRD_PARTY_RESULTS_AFTER_TWO_SEARCHES',\n            matching_third_party_results:\n              matchingThirdPartyResults,\n            results: evidence\n          }\n        }\n      }\n    };\n  }\n\n  // --------------------------------------------------\n  // PAS ASSEZ DE PREUVES\n  // --------------------------------------------------\n\n  return {\n    json: {\n      business_id: business.id,\n      legal_name: business.legal_name,\n      trade_name: business.trade_name,\n      city,\n\n      website_detection_status: 'UNCERTAIN',\n      has_website: null,\n      website_url: null,\n      website_detection_confidence: 0.55,\n\n      website_evidence: {\n        first_pass:\n          business.website_evidence || null,\n\n        deep_pass: {\n          query: business.deep_search_query,\n          detection_reason:\n            'INSUFFICIENT_EVIDENCE',\n          results: evidence\n        }\n      }\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        112
+      ],
+      "id": "08ef0431-cb57-4516-be11-95e3356a773a",
+      "name": "Analyze Deep Website Results"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "businesses",
+        "limit": 5,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "website_detection_status",
+              "condition": "eq",
+              "keyValue": "UNCERTAIN"
+            },
+            {
+              "keyName": "business_status",
+              "condition": "eq",
+              "keyValue": "active"
+            },
+            {
+              "keyName": "registry_name",
+              "condition": "eq",
+              "keyValue": "SIRENE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        112
+      ],
+      "id": "990db40b-128e-401a-92d1-c4378dec1d70",
+      "name": "Get Uncertain Businesses",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "businesses",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.business_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "website_detection_status",
+              "fieldValue": "={{ $json.website_detection_status }}"
+            },
+            {
+              "fieldId": "has_website",
+              "fieldValue": "={{ $json.has_website }}"
+            },
+            {
+              "fieldId": "website_url",
+              "fieldValue": "={{ $json.website_url }}"
+            },
+            {
+              "fieldId": "website_detection_confidence",
+              "fieldValue": "={{ $json.website_detection_confidence }}"
+            },
+            {
+              "fieldId": "website_checked_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "website_evidence",
+              "fieldValue": "={{ $json.website_evidence }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        800,
+        112
+      ],
+      "id": "3c2b2c5a-7312-42b3-819a-7971edfa7966",
+      "name": "Save Final Website Detection",
+      "credentials": {
+        "supabaseApi": {
+          "id": "y1oqda3U92ei0n6V",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      start_deep_pass: true,\n      started_at: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -128
+      ],
+      "id": "bb345a9b-021a-409b-9dd0-2323f319d157",
+      "name": "Start Deep Pass"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Businesses To Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Businesses To Check": {
+      "main": [
+        [
+          {
+            "node": "Prepare Search Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Search Query": {
+      "main": [
+        [
+          {
+            "node": "Search Website with Serper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Website with Serper": {
+      "main": [
+        [
+          {
+            "node": "Analyze Website Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Website Results": {
+      "main": [
+        [
+          {
+            "node": "Save Website Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Website Detection": {
+      "main": [
+        [
+          {
+            "node": "Start Deep Pass",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Deep Search Query": {
+      "main": [
+        [
+          {
+            "node": "Deep Search Website with Serper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deep Search Website with Serper": {
+      "main": [
+        [
+          {
+            "node": "Analyze Deep Website Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Uncertain Businesses": {
+      "main": [
+        [
+          {
+            "node": "Prepare Deep Search Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Deep Website Results": {
+      "main": [
+        [
+          {
+            "node": "Save Final Website Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Deep Pass": {
+      "main": [
+        [
+          {
+            "node": "Get Uncertain Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6b785a36-276a-4947-978e-8b3681ff603e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad301165cb5cd711b5875d2e9bab75d279f3e518e0667c702e40a7ce44394cc3"
+  },
+  "nodeGroups": [],
+  "id": "f2WPSEJwFl8wRMPP",
+  "tags": []
+}
