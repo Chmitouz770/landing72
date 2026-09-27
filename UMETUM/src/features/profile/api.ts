@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
 
 import { useAuth, useUserId } from '@/features/auth/AuthProvider';
+import { isDemo } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 import type { Database, Profile } from '@/types/database';
 
@@ -75,6 +76,7 @@ export async function pickAndUploadAvatar(userId: string): Promise<string | null
   if (result.canceled || !result.assets[0]) return null;
 
   const asset = result.assets[0];
+  if (isDemo) return asset.uri;
   const contentType = asset.mimeType ?? 'image/jpeg';
   const extension = contentType.split('/')[1] ?? 'jpg';
   const body =

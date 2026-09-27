@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { sendLoginCode, verifyLoginCode } from '@/features/auth/api';
+import { isDemo } from '@/lib/env';
 import { spacing } from '@/theme';
 import { Button, Screen, Text, TextField } from '@/ui';
 
@@ -91,6 +92,11 @@ export default function Verify() {
         maxLength={CODE_LENGTH}
         style={{ fontSize: 28, letterSpacing: 10, textAlign: 'center', fontWeight: '700' }}
       />
+      {isDemo ? (
+        <Text tone="accent" center bold>
+          {t('demo.codeHint')}
+        </Text>
+      ) : null}
       <Button title={t('auth.changeEmail')} variant="ghost" onPress={() => router.back()} />
     </Screen>
   );

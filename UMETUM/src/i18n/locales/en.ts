@@ -18,6 +18,13 @@ const en: Translation = {
     send: 'Send',
     optional: 'optional',
   },
+  demo: {
+    banner: 'Demo · sample data, nothing is sent',
+    codeHint: 'Demo: any 6-digit code works.',
+    unavailable: 'This action is disabled in the demo.',
+    video: 'In the real app, the video call opens right here, between the two of you.',
+    payment: 'In the real app, the secure Stripe payment page opens here.',
+  },
   errors: {
     generic: 'Oops, something went wrong. Please try again.',
     network: 'No connection. Check your network.',

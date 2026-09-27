@@ -4,15 +4,16 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
 import { useMyProfile } from '@/features/profile/api';
 import { restoreLanguage } from '@/i18n';
-import { isBackendConfigured } from '@/lib/env';
+import { isBackendConfigured, isDemo } from '@/lib/env';
 import { queryClient } from '@/lib/queryClient';
 import { useTheme } from '@/theme';
-import { EmptyState, ErrorView, LoadingView, Screen } from '@/ui';
+import { DialogHost, EmptyState, ErrorView, Icon, LoadingView, Screen, Text } from '@/ui';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -27,7 +28,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <RootNavigator ready={languageReady} />
+          <View style={styles.root}>
+            {isDemo ? <DemoBanner /> : null}
+            <RootNavigator ready={languageReady} />
+          </View>
+          <DialogHost />
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
@@ -122,3 +127,26 @@ function RootNavigator({ ready }: { ready: boolean }) {
     </ThemeProvider>
   );
 }
+
+function DemoBanner() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.banner, { backgroundColor: colors.accentSoft, borderBottomColor: colors.border }]}>
+      <Icon name="eye-outline" size={14} color={colors.text} />
+      <Text variant="caption">{t('demo.banner')}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+});

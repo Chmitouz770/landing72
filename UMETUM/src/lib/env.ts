@@ -10,4 +10,7 @@ export const env = {
   contactEmail: process.env.EXPO_PUBLIC_CONTACT_EMAIL ?? '',
 };
 
-export const isBackendConfigured = Boolean(env.supabaseUrl && env.supabaseKey);
+/** Mode démo : faux backend en mémoire, aucune donnée ne quitte l'appareil. */
+export const isDemo = process.env.EXPO_PUBLIC_DEMO === '1';
+
+export const isBackendConfigured = isDemo || Boolean(env.supabaseUrl && env.supabaseKey);

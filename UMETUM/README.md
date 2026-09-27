@@ -46,6 +46,14 @@ npm run ios / npm run android     # build de développement (nécessaire pour la
 ```
 
 Sans backend configuré, l'app affiche un écran « Configuration requise ».
+
+### Démo à partager (sans serveur)
+
+```bash
+npm run build:demo                # → dist-demo/umetum-demo.html
+```
+
+Cette page HTML autonome contient toute l'app, avec un faux backend en mémoire et des données fictives. N'importe quel code à 6 chiffres permet de se connecter, et une demande envoyée est « acceptée » au bout de quelques secondes. La page s'ouvre dans n'importe quel navigateur et s'envoie facilement pour montrer l'app.
 Le guide complet de mise en production (Supabase, LiveKit, Stripe, stores) est dans **[docs/SETUP.md](docs/SETUP.md)**.
 
 ## Qualité

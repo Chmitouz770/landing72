@@ -10,3 +10,4 @@ export * from './SegmentedControl';
 export * from './States';
 export * from './Text';
 export * from './TextField';
+export * from './DialogHost';

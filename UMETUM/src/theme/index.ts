@@ -1,4 +1,4 @@
-import { useColorScheme } from 'react-native';
+import { useScheme } from './useScheme';
 
 /**
  * Identité visuelle UMETUM : bleu nuit (le ciel, le talith) et or (la couronne
@@ -78,7 +78,7 @@ export const typography = {
 export const MAX_CONTENT_WIDTH = 720;
 
 export function useTheme() {
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   const isDark = scheme === 'dark';
   return { colors: isDark ? dark : light, isDark };
 }

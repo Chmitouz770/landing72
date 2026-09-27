@@ -6,19 +6,33 @@ import { AppState, Platform } from 'react-native';
 
 import type { Database } from '@/types/database';
 
-import { env, isBackendConfigured } from './env';
+import { demoFetch } from './demo/fetch';
+import { env, isBackendConfigured, isDemo } from './env';
+
+/** Stockage en mémoire (démo) : chaque visite repart de zéro. */
+const memory = new Map<string, string>();
+const memoryStorage = {
+  getItem: (key: string) => memory.get(key) ?? null,
+  setItem: (key: string, value: string) => {
+    memory.set(key, value);
+  },
+  removeItem: (key: string) => {
+    memory.delete(key);
+  },
+};
 
 export const supabase = createClient<Database>(
   // Valeurs factices si non configuré : l'app affiche alors l'écran de configuration.
-  isBackendConfigured ? env.supabaseUrl : 'https://not-configured.supabase.co',
-  isBackendConfigured ? env.supabaseKey : 'not-configured',
+  isDemo ? 'https://demo.umetum.app' : isBackendConfigured ? env.supabaseUrl : 'https://not-configured.supabase.co',
+  isDemo ? 'demo' : isBackendConfigured ? env.supabaseKey : 'not-configured',
   {
     auth: {
-      storage: AsyncStorage,
-      autoRefreshToken: true,
+      storage: isDemo ? memoryStorage : AsyncStorage,
+      autoRefreshToken: !isDemo,
       persistSession: true,
       detectSessionInUrl: false,
     },
+    global: isDemo ? { fetch: demoFetch } : undefined,
   },
 );
 

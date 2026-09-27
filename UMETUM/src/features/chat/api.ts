@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { useUserId } from '@/features/auth/AuthProvider';
+import { isDemo } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 import type { Message } from '@/types/database';
 
@@ -21,6 +22,7 @@ export function useMessages(connectionId: string, enabled = true) {
   const query = useQuery({
     queryKey: messageKey(connectionId),
     enabled: enabled && !!connectionId,
+    refetchInterval: isDemo ? 3_000 : false,
     queryFn: async (): Promise<Message[]> => {
       const { data, error } = await supabase
         .from('messages')
@@ -34,7 +36,7 @@ export function useMessages(connectionId: string, enabled = true) {
   });
 
   useEffect(() => {
-    if (!enabled || !connectionId) return;
+    if (!enabled || !connectionId || isDemo) return;
     const channel = supabase
       .channel(`messages:${connectionId}`)
       .on(

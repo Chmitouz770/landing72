@@ -17,6 +17,13 @@ const fr = {
     send: 'Envoyer',
     optional: 'optionnel',
   },
+  demo: {
+    banner: 'Démo · données fictives, rien n’est envoyé',
+    codeHint: 'Démo : n’importe quel code à 6 chiffres fonctionne.',
+    unavailable: 'Cette action est désactivée dans la démo.',
+    video: 'Dans la vraie app, la visio s’ouvre ici, directement entre vous deux.',
+    payment: 'Dans la vraie app, la page de paiement sécurisée Stripe s’ouvre ici.',
+  },
   errors: {
     generic: 'Oups, quelque chose s’est mal passé. Réessaie.',
     network: 'Pas de connexion. Vérifie ton réseau.',

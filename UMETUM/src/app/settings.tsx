@@ -7,6 +7,7 @@ import { deleteMyAccount } from '@/features/account/api';
 import { LANGUAGE_NAMES, setLanguage, SUPPORTED_LANGUAGES, type AppLanguage } from '@/i18n';
 import { confirm, notify } from '@/lib/dialogs';
 import { env } from '@/lib/env';
+import { AppFunctionError } from '@/lib/supabase';
 import { Button, ChoiceChips, Field, ListRow, Screen, Text } from '@/ui';
 
 export default function Settings() {
@@ -28,8 +29,8 @@ export default function Settings() {
     setDeleting(true);
     try {
       await deleteMyAccount();
-    } catch {
-      notify(t('errors.generic'));
+    } catch (e) {
+      notify(e instanceof AppFunctionError && e.code === 'demo_mode' ? t('demo.unavailable') : t('errors.generic'));
       setDeleting(false);
     }
   };

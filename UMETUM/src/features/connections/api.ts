@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { useUserId } from '@/features/auth/AuthProvider';
+import { isDemo } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
 import type { Connection, Listing, Profile } from '@/types/database';
 
@@ -38,6 +39,7 @@ export function isAwaitingMe(connection: Connection, myId: string): boolean {
 export function useMyConnections() {
   return useQuery({
     queryKey: connectionKeys.mine,
+    refetchInterval: isDemo ? 4_000 : false,
     queryFn: async (): Promise<ConnectionWithPeople[]> => {
       const { data, error } = await supabase
         .from('connections')
@@ -54,6 +56,7 @@ export function useConnection(id: string | undefined) {
   return useQuery({
     queryKey: connectionKeys.detail(id ?? ''),
     enabled: !!id,
+    refetchInterval: isDemo ? 4_000 : false,
     queryFn: async (): Promise<ConnectionWithPeople | null> => {
       const { data, error } = await supabase
         .from('connections')
@@ -72,6 +75,7 @@ export function useMyOpenRequest(listingId: string | undefined) {
   return useQuery({
     queryKey: connectionKeys.forListing(listingId ?? ''),
     enabled: !!listingId && !!userId,
+    refetchInterval: isDemo ? 4_000 : false,
     queryFn: async (): Promise<Connection | null> => {
       const { data, error } = await supabase
         .from('connections')
@@ -122,7 +126,7 @@ export function useConnectionsRealtime() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || isDemo) return;
     const channel = supabase
       .channel(`connections:${userId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'connections' }, () => {

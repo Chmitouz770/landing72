@@ -41,9 +41,12 @@ export default function CallScreen() {
 
   if (credentials.isError) {
     const code = credentials.error instanceof AppFunctionError ? credentials.error.code : '';
-    const message = (KNOWN_ERRORS as readonly string[]).includes(code)
-      ? t(`call.${code as KnownError}`)
-      : t('call.error');
+    const message =
+      code === 'demo_mode'
+        ? t('demo.video')
+        : (KNOWN_ERRORS as readonly string[]).includes(code)
+          ? t(`call.${code as KnownError}`)
+          : t('call.error');
     return <CallMessage message={message} onClose={leave} />;
   }
 

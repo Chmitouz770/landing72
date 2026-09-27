@@ -65,7 +65,13 @@ export default function Donate() {
       await startDonation({ kind: effectiveKind, amountCents, currency, dedication });
     } catch (e) {
       const code = e instanceof AppFunctionError ? e.code : '';
-      notify(code === 'already_subscribed' ? t('donate.already_subscribed') : t('errors.generic'));
+      notify(
+        code === 'already_subscribed'
+          ? t('donate.already_subscribed')
+          : code === 'demo_mode'
+            ? t('demo.payment')
+            : t('errors.generic'),
+      );
     } finally {
       setLoading(false);
     }
@@ -75,8 +81,8 @@ export default function Donate() {
     setPortalLoading(true);
     try {
       await openBillingPortal();
-    } catch {
-      notify(t('errors.generic'));
+    } catch (e) {
+      notify(e instanceof AppFunctionError && e.code === 'demo_mode' ? t('demo.payment') : t('errors.generic'));
     } finally {
       setPortalLoading(false);
     }
