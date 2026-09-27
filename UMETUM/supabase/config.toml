@@ -1,0 +1,80 @@
+# Configuration Supabase pour le développement local (`supabase start`).
+# En production, reporter les réglages équivalents dans le dashboard
+# (voir docs/SETUP.md).
+project_id = "umetum"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+# Boîte mail locale pour lire les codes de connexion : http://127.0.0.1:54324
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "5MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:8081"
+additional_redirect_urls = ["umetum://", "exp://**"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+
+[auth.email]
+# Connexion sans mot de passe : un code à 6 chiffres envoyé par e-mail.
+enable_signup = true
+enable_confirmations = false
+double_confirm_changes = true
+otp_length = 6
+otp_expiry = 3600
+max_frequency = "30s"
+
+[auth.email.template.magic_link]
+subject = "Ton code de connexion UMETUM"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Bienvenue sur UMETUM – ton code"
+content_path = "./supabase/templates/confirmation.html"
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+[functions.livekit-token]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.billing-portal]
+verify_jwt = false
+
+# Appelé par Stripe, authentifié par signature (pas de JWT Supabase).
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
