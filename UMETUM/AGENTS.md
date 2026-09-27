@@ -46,7 +46,8 @@ App de mise en relation pour l'étude de la Torah (élèves ↔ enseignants, vis
 Lire `docs/ARCHITECTURE.md` avant toute modification structurante.
 
 - Écrans : `src/app/` (fins). Logique : `src/features/<domaine>/api.ts` (Supabase + React Query). UI générique : `src/ui/`.
-- Textes : toujours via `t('...')`. `src/i18n/locales/fr.ts` est la référence ; `en.ts` et `he.ts` doivent avoir les mêmes clés (hébreu = RTL).
+- Textes : toujours via `t('...')`. `src/i18n/locales/fr.ts` est la référence ; les 8 autres langues (en, he, yi, ru, es, pt, it, de) doivent avoir les mêmes clés (hébreu et yiddish = RTL).
+- Règles de la communauté (imposées en base, ne jamais contourner côté app) : non-mixité hommes / femmes, rien le samedi, séances rémunérées (tarif dans `app_settings`) seulement après double confirmation.
 - Couleurs : `useTheme().colors`, jamais en dur.
 - Base : toute évolution = nouvelle migration dans `supabase/migrations/` + scénarios dans `supabase/tests/rls_test.sql` + types dans `src/types/database.ts`.
 - La sécurité est dans la base (RLS). Les secrets (Stripe, LiveKit) ne vivent que dans les Edge Functions (`supabase/functions/`, Deno).

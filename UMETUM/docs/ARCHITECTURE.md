@@ -47,6 +47,8 @@ erDiagram
 | `study_sessions` | Séances (visio ou présentiel). `room_name` identifie la salle LiveKit. |
 | `donations`, `subscriptions`, `stripe_customers` | Dons, écrits uniquement par le webhook Stripe. |
 | `reports`, `blocks` | Signalements et blocages. |
+| `payouts` | Versements aux enseignants (un par enseignant et par mois), créés par `generate_payouts()`. |
+| `app_settings` | Réglages modifiables sans nouvelle version de l'app, par exemple `teacher_hourly_rate` = 40 ₪. |
 
 ## Sécurité (RLS)
 
@@ -55,6 +57,9 @@ erDiagram
 - Les mises en relation ne s'écrivent pas directement. Elles passent par deux fonctions SQL : `request_connection()`, qui déduit qui enseigne et qui apprend, et `respond_connection()` (accepter, refuser, annuler, avec les bonnes permissions).
 - Les dons ne peuvent pas être écrits depuis l'app, seulement par le webhook Stripe signé.
 - Le blocage masque les annonces dans les deux sens et termine les échanges en cours.
+- **Non-mixité** : le public d'une annonce (`men` / `women`) est forcé à partir du genre de son auteur. Les annonces et les profils ne sont visibles qu'entre membres du même genre, et `request_connection` refuse une demande vers l'autre genre. Le genre ne peut plus être modifié une fois choisi, sauf par l'équipe.
+- **Chabbat** : `is_shabbat()` refuse toute séance planifiée un samedi, dans le fuseau de la personne qui planifie. L'app est fermée le samedi.
+- **Rémunération** : une séance passe à `completed` seulement quand l'enseignant et l'élève l'ont confirmée via `confirm_session()`. Une séance validée ne peut plus être modifiée.
 - Tout cela est vérifié par `supabase/tests/rls_test.sql` (`./scripts/test-db.sh`).
 
 ## Parcours principaux
@@ -70,6 +75,11 @@ erDiagram
 2. La fonction vérifie, avec les droits de l'utilisateur (RLS), qu'il est bien participant et que l'horaire est dans la fenêtre prévue, puis signe un jeton pour la salle `room_name`.
 3. L'app rejoint la salle : SDK natif LiveKit sur mobile, composant web sur navigateur. Le module vidéo n'est chargé qu'à ce moment-là.
 
+**Rémunération des enseignants**
+1. Après la séance, l'enseignant confirme « séance donnée » et l'élève « la séance a eu lieu ». La séance est alors validée.
+2. Chaque mois, l'équipe lance `select generate_payouts('AAAA-MM-01');`. Un versement est créé par enseignant, au tarif de `app_settings.teacher_hourly_rate`.
+3. L'association fait les virements, puis marque chaque versement comme payé : `update payouts set status = 'paid', paid_at = now() where id = ...`. L'enseignant le voit dans « Mes gains ».
+
 **Dons**
 1. `create-checkout` crée une session Stripe Checkout (montant libre, mensuel ou ponctuel) et renvoie son URL.
 2. L'app ouvre l'URL : Safari sur iOS (règle App Store), navigateur intégré sur Android, même onglet sur le web.
@@ -84,7 +94,7 @@ src/features/<x>/   Un dossier par domaine métier :
                       *Card.tsx     composants propres au domaine
 src/ui/             Composants génériques, sans logique métier.
 src/theme/          Jetons de design (couleurs clair/sombre, espacements, typographie).
-src/i18n/locales/   fr.ts est la référence ; en.ts et he.ts doivent avoir les mêmes clés (vérifié par TypeScript).
+src/i18n/locales/   fr.ts est la référence. Les 8 autres langues (en, he, yi, ru, es, pt, it, de) ont exactement les mêmes clés, ce que TypeScript vérifie.
 src/types/          Types de la base, miroir des migrations.
 ```
 
@@ -101,7 +111,7 @@ src/types/          Types de la base, miroir des migrations.
 3. **Types** : ajouter la table dans `src/types/database.ts`. Avec un Supabase local, `npm run db:types` génère la version officielle dans `database.gen.ts`, utile pour comparer.
 4. **Logique** : `src/features/reviews/api.ts` (hooks `useReviews`, `useCreateReview`).
 5. **Écran** : `src/app/review/[sessionId].tsx`, et le déclarer dans `src/app/_layout.tsx`, dans le bloc `Stack.Protected` des membres connectés.
-6. **Textes** : clés dans `fr.ts`, `en.ts` et `he.ts`.
+6. **Textes** : clés dans `fr.ts` et dans les 8 autres fichiers de langue (TypeScript signale les manquants).
 7. **Vérifier** : `npm run typecheck && npm run lint && ./scripts/test-db.sh`.
 
 ## Montée en charge

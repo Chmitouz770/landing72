@@ -8,7 +8,6 @@ import { useUserId } from '@/features/auth/AuthProvider';
 import { useListingFeed, type ListingFilters } from '@/features/listings/api';
 import { ListingCard } from '@/features/listings/ListingCard';
 import { FORMAT_ICONS } from '@/features/listings/options';
-import { useMyProfile } from '@/features/profile/api';
 import { topicIcon, useTopicLabel, useTopics } from '@/features/topics/api';
 import { MAX_CONTENT_WIDTH, spacing, useTheme } from '@/theme';
 import type { ListingKind } from '@/types/database';
@@ -40,7 +39,6 @@ export default function Explore() {
   const { colors } = useTheme();
   const params = useLocalSearchParams<{ kind?: ListingKind }>();
   const myId = useUserId();
-  const { data: profile } = useMyProfile();
   const { data: topics } = useTopics();
   const topicLabel = useTopicLabel();
 
@@ -62,7 +60,6 @@ export default function Explore() {
     topicId: topicId === ALL ? null : topicId,
     format: format === ALL ? null : format,
     search: debouncedSearch,
-    viewerGender: profile?.gender ?? null,
     excludeOwnerId: myId,
   };
   const feed = useListingFeed(filters);

@@ -9,7 +9,6 @@ import {
   type ListingWithOwner,
 } from '@/features/listings/api';
 import {
-  audienceOptions,
   formatOptions,
   languageOptions,
   levelOptions,
@@ -18,7 +17,7 @@ import {
 import { useMyProfile } from '@/features/profile/api';
 import { topicIcon, useTopicLabel, useTopics } from '@/features/topics/api';
 import { notify } from '@/lib/dialogs';
-import type { Audience, ListingKind, Profile, StudyFormat, StudyLevel } from '@/types/database';
+import type { ListingKind, Profile, StudyFormat, StudyLevel } from '@/types/database';
 import {
   Button,
   ChoiceChips,
@@ -67,7 +66,6 @@ function ListingForm({ id, initialKind, existing, profile }: FormProps) {
   const [description, setDescription] = useState(existing?.description ?? '');
   const [format, setFormat] = useState<StudyFormat>(existing?.format ?? 'video');
   const [level, setLevel] = useState<StudyLevel>(existing?.level ?? 'all');
-  const [audience, setAudience] = useState<Audience>(existing?.audience ?? 'all');
   const [languages, setLanguages] = useState<StudyLanguage[]>(
     ((existing?.languages ?? profile?.languages) as StudyLanguage[] | undefined) ?? ['fr'],
   );
@@ -87,7 +85,6 @@ function ListingForm({ id, initialKind, existing, profile }: FormProps) {
       description: description.trim() || null,
       format,
       level,
-      audience,
       languages: languages.length > 0 ? languages : ['fr'],
       city: format === 'video' ? null : city.trim() || null,
       availability: availability.trim() || null,
@@ -180,9 +177,6 @@ function ListingForm({ id, initialKind, existing, profile }: FormProps) {
         <ChoiceChips options={levelOptions(t)} value={level} onChange={setLevel} />
       </Field>
 
-      <Field label={t('listing.audienceLabel')}>
-        <ChoiceChips options={audienceOptions(t)} value={audience} onChange={setAudience} />
-      </Field>
 
       <Field label={t('listing.languagesLabel')}>
         <MultiChoiceChips options={languageOptions(t)} values={languages} onChange={setLanguages} />

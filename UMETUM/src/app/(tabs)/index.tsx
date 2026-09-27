@@ -8,7 +8,8 @@ import { useMySubscription } from '@/features/donations/api';
 import { useListingFeed } from '@/features/listings/api';
 import { ListingCard } from '@/features/listings/ListingCard';
 import { useMyProfile } from '@/features/profile/api';
-import { useUpcomingSessions } from '@/features/sessions/api';
+import { useFormattedRate } from '@/features/earnings/api';
+import { useSessionsToConfirm, useUpcomingSessions } from '@/features/sessions/api';
 import { SessionCard } from '@/features/sessions/SessionCard';
 import { radius, spacing, useTheme } from '@/theme';
 import { Avatar, Button, Card, ChevronIcon, Icon, Screen, Section, Text, type IconName } from '@/ui';
@@ -21,9 +22,10 @@ export default function Home() {
   const connections = useMyConnections();
   const sessions = useUpcomingSessions();
   const subscription = useMySubscription();
+  const toConfirm = useSessionsToConfirm();
+  const rate = useFormattedRate();
   const latest = useListingFeed({
     kind: 'offer',
-    viewerGender: profile?.gender ?? null,
     excludeOwnerId: myId,
   });
 
@@ -36,6 +38,7 @@ export default function Home() {
     sessions.refetch();
     latest.refetch();
     subscription.refetch();
+    toConfirm.refetch();
   };
 
   return (
@@ -61,7 +64,7 @@ export default function Home() {
         <BigAction
           icon="school"
           title={t('home.teachCta')}
-          description={t('home.teachCtaDesc')}
+          description={t('home.teachCtaDesc', { rate })}
           onPress={() => router.push({ pathname: '/listing/new', params: { kind: 'offer' } })}
         />
       </View>
@@ -76,6 +79,14 @@ export default function Home() {
             <ChevronIcon color={colors.text} />
           </View>
         </Card>
+      ) : null}
+
+      {(toConfirm.data ?? []).length > 0 ? (
+        <Section title={t('home.toConfirm')}>
+          {toConfirm.data!.slice(0, 3).map((s) => (
+            <SessionCard key={s.id} session={s} />
+          ))}
+        </Section>
       ) : null}
 
       {upcoming.length > 0 ? (

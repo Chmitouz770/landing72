@@ -12,6 +12,7 @@ import { useMyProfile } from '@/features/profile/api';
 import { restoreLanguage } from '@/i18n';
 import { isBackendConfigured, isDemo } from '@/lib/env';
 import { queryClient } from '@/lib/queryClient';
+import { useNow } from '@/lib/useNow';
 import { useTheme } from '@/theme';
 import { DialogHost, EmptyState, ErrorView, Icon, LoadingView, Screen, Text } from '@/ui';
 
@@ -45,6 +46,8 @@ function RootNavigator({ ready }: { ready: boolean }) {
   const { session, isLoading } = useAuth();
   const profile = useMyProfile();
 
+  const now = useNow(60_000);
+  const isShabbat = new Date(now).getDay() === 6;
   const signedIn = !!session;
   const booting = !ready || isLoading || (signedIn && profile.isPending);
   const onboarded = !!profile.data?.onboarded_at;
@@ -63,6 +66,9 @@ function RootNavigator({ ready }: { ready: boolean }) {
       </Screen>
     );
   }
+
+  // Rien le samedi : l'app est fermée pendant Chabbat.
+  if (isShabbat) return <ShabbatScreen />;
 
   if (signedIn && profile.isError) {
     return <ErrorView onRetry={() => profile.refetch()} />;
@@ -118,6 +124,7 @@ function RootNavigator({ ready }: { ready: boolean }) {
           <Stack.Screen name="donate/index" options={{ title: t('donate.title') }} />
           <Stack.Screen name="profile/edit" options={{ title: t('profile.edit') }} />
           <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
+          <Stack.Screen name="earnings" options={{ title: t('earnings.title') }} />
           <Stack.Screen name="report" options={{ title: t('report.title'), presentation: 'modal' }} />
         </Stack.Protected>
 
@@ -125,6 +132,25 @@ function RootNavigator({ ready }: { ready: boolean }) {
         <Stack.Screen name="donate/thanks" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
+  );
+}
+
+function ShabbatScreen() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  return (
+    <Screen edges={['top', 'bottom']} contentStyle={styles.shabbat}>
+      <View style={[styles.candles, { backgroundColor: colors.accentSoft }]}>
+        <Icon name="flame" size={40} color={colors.accent} />
+        <Icon name="flame" size={40} color={colors.accent} />
+      </View>
+      <Text variant="title" center>
+        {t('shabbat.title')}
+      </Text>
+      <Text center tone="muted">
+        {t('shabbat.text')}
+      </Text>
+    </Screen>
   );
 }
 
@@ -141,6 +167,8 @@ function DemoBanner() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  shabbat: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
+  candles: { flexDirection: 'row', gap: 12, padding: 24, borderRadius: 999 },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',

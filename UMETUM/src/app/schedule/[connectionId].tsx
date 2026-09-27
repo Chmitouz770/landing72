@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useCreateSession } from '@/features/sessions/api';
+import { isShabbatError, useCreateSession } from '@/features/sessions/api';
 import { nextDays, relativeDayLabel } from '@/lib/dates';
 import { notify } from '@/lib/dialogs';
 import type { SessionMode } from '@/types/database';
@@ -48,7 +48,7 @@ export default function ScheduleSession() {
       },
       {
         onSuccess: () => router.back(),
-        onError: () => notify(t('errors.generic')),
+        onError: (e) => notify(isShabbatError(e) ? t('session.shabbat') : t('errors.generic')),
       },
     );
   };

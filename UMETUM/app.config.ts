@@ -43,7 +43,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
-    ['expo-localization', { supportsRTL: true, supportedLocales: ['fr', 'en', 'he'] }],
+    [
+      'expo-localization',
+      { supportsRTL: true, supportedLocales: ['fr', 'en', 'he', 'yi', 'ru', 'es', 'pt', 'it', 'de'] },
+    ],
     [
       'expo-splash-screen',
       {

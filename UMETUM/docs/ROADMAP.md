@@ -8,7 +8,10 @@
 - Visio intégrée (LiveKit), « Visio maintenant »
 - Dons ponctuels et maasser mensuel au montant libre (Stripe), dédicaces, historique
 - Signaler, bloquer, supprimer son compte
-- Français, anglais, hébreu (RTL), mode sombre
+- 9 langues : français, anglais, hébreu, yiddish, russe, espagnol, portugais, italien, allemand (RTL pour l'hébreu et le yiddish), mode sombre
+- Non-mixité imposée par la base, app fermée le samedi
+- Enseignants rémunérés 40 ₪/h : double confirmation des séances, écran « Mes gains », versements mensuels
+- Devises selon le pays (€, $, £, ₪…)
 
 ## 🎯 v0.2 : avant le lancement public
 
@@ -24,16 +27,17 @@
 
 - [ ] **Cours collectifs** : un enseignant, plusieurs élèves (salles LiveKit à N participants)
 - [ ] **Séances récurrentes** (« tous les mardis à 20 h ») et ajout au calendrier
-- [ ] **Horaires juifs** : pas de séance le vendredi soir après l'entrée du Chabbat ni les jours de fête (API Hebcal, selon la ville)
+- [ ] **Horaires juifs précis** : fermeture dès l'entrée du Chabbat le vendredi et jusqu'à sa sortie, plus les jours de fête (API Hebcal, selon la ville)
 - [ ] **Recherche par distance** pour le présentiel (PostGIS)
 - [ ] **Avis et remerciements** après une séance
 - [ ] Profils d'enseignants vérifiés (badge « Rav », « Morah »…)
-- [ ] Interface en **yiddish**, en russe, en espagnol
 - [ ] Textes intégrés (Sefaria) pendant la visio
 
 ## 💛 v0.4 : financement
 
-- [ ] **Reçus fiscaux** automatiques (Cerfa en France, sections 46 en Israël) pour les dons
+- [ ] **Reçus fiscaux Cerfa** automatiques. L'adresse des donateurs est déjà collectée ; il manque les infos de l'association. Ensuite : section 46 en Israël, 501(c)(3) aux États-Unis.
+- [ ] **Virements automatiques aux enseignants** (Stripe Connect), avec l'écran « Mes gains » déjà en place
+- [ ] Durée réelle des visios (webhook LiveKit) pour contrôler les heures déclarées
 - [ ] **Soutenir un enseignant en particulier** (Stripe Connect), si l'association le souhaite
 - [ ] Campagnes (« Parrainer 100 heures d'étude avant Chavouot »)
 - [ ] Page « Impact » : heures étudiées, nombre de havroutot créées

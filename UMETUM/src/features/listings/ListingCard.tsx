@@ -41,7 +41,6 @@ export function ListingCard({ listing, showOwner = true }: { listing: ListingWit
       <View style={styles.badges}>
         <Badge label={t(`format.${listing.format}`)} icon={FORMAT_ICONS[listing.format]} />
         <Badge label={t(`level.${listing.level}`)} />
-        {listing.audience !== 'all' ? <Badge label={t(`audience.${listing.audience}`)} tone="accent" /> : null}
         {listing.languages.slice(0, 3).map((code) => (
           <Badge key={code} label={code.toUpperCase()} />
         ))}

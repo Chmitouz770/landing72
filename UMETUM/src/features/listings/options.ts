@@ -1,10 +1,10 @@
 import type { TFunction } from 'i18next';
 
-import type { Audience, Gender, StudyFormat, StudyLevel } from '@/types/database';
+import type { Gender, StudyFormat, StudyLevel } from '@/types/database';
 import type { ChoiceOption, IconName } from '@/ui';
 
 /** Langues proposées pour les cours (code ISO 639-1). */
-export const STUDY_LANGUAGES = ['fr', 'he', 'en', 'yi', 'ru', 'es'] as const;
+export const STUDY_LANGUAGES = ['fr', 'he', 'en', 'yi', 'ru', 'es', 'pt', 'it', 'de'] as const;
 export type StudyLanguage = (typeof STUDY_LANGUAGES)[number];
 
 export const FORMAT_ICONS: Record<StudyFormat, IconName> = {
@@ -30,10 +30,6 @@ export function levelOptions(t: TFunction): ChoiceOption<StudyLevel>[] {
     value,
     label: t(`level.${value}`),
   }));
-}
-
-export function audienceOptions(t: TFunction): ChoiceOption<Audience>[] {
-  return (['all', 'men', 'women'] as const).map((value) => ({ value, label: t(`audience.${value}`) }));
 }
 
 export function genderOptions(t: TFunction): ChoiceOption<Gender>[] {

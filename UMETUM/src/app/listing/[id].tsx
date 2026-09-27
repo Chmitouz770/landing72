@@ -126,7 +126,6 @@ export default function ListingDetail() {
       <View style={styles.badges}>
         <Badge label={t(`format.${l.format}`)} icon={FORMAT_ICONS[l.format]} />
         <Badge label={t(`level.${l.level}`)} />
-        <Badge label={t(`audience.${l.audience}`)} tone={l.audience === 'all' ? 'neutral' : 'accent'} />
         {l.languages.map((code) => (
           <Badge key={code} label={languageLabel(t, code)} />
         ))}

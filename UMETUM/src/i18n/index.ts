@@ -4,26 +4,48 @@ import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { I18nManager, Platform } from 'react-native';
 
+import de from './locales/de';
 import en from './locales/en';
+import es from './locales/es';
 import fr from './locales/fr';
 import he from './locales/he';
+import it from './locales/it';
+import pt from './locales/pt';
+import ru from './locales/ru';
+import yi from './locales/yi';
 
-export const SUPPORTED_LANGUAGES = ['fr', 'en', 'he'] as const;
+/**
+ * Langues de l'interface. Pour en ajouter une : créer locales/<code>.ts
+ * (même clés que fr.ts, vérifié par TypeScript) et l'ajouter ci-dessous.
+ */
+export const SUPPORTED_LANGUAGES = ['fr', 'en', 'he', 'yi', 'ru', 'es', 'pt', 'it', 'de'] as const;
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_NAMES: Record<AppLanguage, string> = {
   fr: 'Français',
   en: 'English',
   he: 'עברית',
+  yi: 'ייִדיש',
+  ru: 'Русский',
+  es: 'Español',
+  pt: 'Português',
+  it: 'Italiano',
+  de: 'Deutsch',
 };
 
-const RTL_LANGUAGES: AppLanguage[] = ['he'];
+const RTL_LANGUAGES: AppLanguage[] = ['he', 'yi'];
 const STORAGE_KEY = 'umetum.language';
 
 export const resources = {
   fr: { translation: fr },
   en: { translation: en },
   he: { translation: he },
+  yi: { translation: yi },
+  ru: { translation: ru },
+  es: { translation: es },
+  pt: { translation: pt },
+  it: { translation: it },
+  de: { translation: de },
 } as const;
 
 function isSupported(lang: string | null | undefined): lang is AppLanguage {

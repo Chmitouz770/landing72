@@ -1,7 +1,10 @@
 import i18n from '@/i18n';
 
-function locale(): string {
-  return i18n.language || 'fr';
+/** Langue des dates et montants. Sans données yiddish dans le moteur, on prend l'hébreu. */
+export function locale(): string {
+  const lang = i18n.language || 'fr';
+  if (lang === 'yi' && Intl.DateTimeFormat.supportedLocalesOf(['yi']).length === 0) return 'he';
+  return lang;
 }
 
 export function formatDateTime(iso: string): string {

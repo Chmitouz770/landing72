@@ -4,7 +4,6 @@ import { useUserId } from '@/features/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
 import type {
   Database,
-  Gender,
   Listing,
   ListingKind,
   ListingStatus,
@@ -25,8 +24,6 @@ export type ListingFilters = {
   topicId?: string | null;
   format?: 'video' | 'in_person' | null;
   search?: string;
-  /** Genre de l'utilisateur : masque les annonces réservées à l'autre public. */
-  viewerGender?: Gender | null;
   excludeOwnerId?: string;
 };
 
@@ -58,9 +55,6 @@ export function useListingFeed(filters: ListingFilters) {
 
       if (filters.topicId) query = query.eq('topic_id', filters.topicId);
       if (filters.format) query = query.in('format', [filters.format, 'both']);
-      if (filters.viewerGender) {
-        query = query.in('audience', ['all', filters.viewerGender === 'male' ? 'men' : 'women']);
-      }
       if (filters.excludeOwnerId) query = query.neq('owner_id', filters.excludeOwnerId);
       const search = sanitizeSearch(filters.search ?? '');
       if (search) query = query.or(`title.ilike.*${search}*,description.ilike.*${search}*`);
@@ -115,7 +109,6 @@ export type ListingDraft = Pick<
   | 'description'
   | 'level'
   | 'format'
-  | 'audience'
   | 'languages'
   | 'city'
   | 'availability'

@@ -15,7 +15,9 @@ import {
   useRespondConnection,
 } from '@/features/connections/api';
 import {
+  isShabbatError,
   JOIN_LATE_HOURS,
+  needsMyConfirmation,
   useCancelSession,
   useConnectionSessions,
   useCreateSession,
@@ -74,7 +76,7 @@ export default function ConnectionScreen() {
       {
         onSuccess: (session) =>
           router.push({ pathname: '/call/[sessionId]', params: { sessionId: session.id } }),
-        onError: () => notify(t('errors.generic')),
+        onError: (e) => notify(isShabbatError(e) ? t('session.shabbat') : t('errors.generic')),
       },
     );
 
@@ -163,6 +165,13 @@ export default function ConnectionScreen() {
             {accepted && nextSession ? (
               <SessionCard session={nextSession} showPeer={false} onCancel={cancelNext} compact />
             ) : null}
+
+            {(sessions.data ?? [])
+              .filter((s) => needsMyConfirmation(s, myId, now))
+              .slice(0, 2)
+              .map((s) => (
+                <SessionCard key={s.id} session={s} showPeer={false} />
+              ))}
           </View>
 
           {accepted ? (

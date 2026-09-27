@@ -113,7 +113,29 @@ npx eas-cli submit --platform all
 | **Contenu entre utilisateurs (Apple 1.2)** : signaler, bloquer, publier un contact. | Boutons *Signaler* et *Bloquer* sur les profils et annonces, *Nous contacter* dans les réglages (`EXPO_PUBLIC_CONTACT_EMAIL`). |
 | **Politique de confidentialité** | ⚠️ À rédiger et publier sur le site, puis renseigner son URL dans App Store Connect et la Play Console. |
 
-## 8. Développement local complet (optionnel)
+## 8. Rémunération des enseignants (chaque mois)
+
+Le tarif est stocké en base, et peut changer sans mettre à jour l'app :
+```sql
+update app_settings set value = '{"amount_cents": 4000, "currency": "ils"}' where key = 'teacher_hourly_rate';
+```
+
+En début de mois, dans le SQL Editor de Supabase :
+```sql
+select generate_payouts('2026-10-01');   -- crée les versements d'octobre pour les séances validées
+select p.*, pr.display_name from payouts p join profiles pr on pr.id = p.teacher_id where p.status = 'pending';
+-- après les virements :
+update payouts set status = 'paid', paid_at = now(), reference = 'VIR-2026-10' where status = 'pending';
+```
+
+> Une séance n'est comptée que si **l'enseignant et l'élève** l'ont confirmée dans l'app.
+> Plus tard, les virements pourront être automatisés avec Stripe Connect (voir la feuille de route).
+
+## 9. Reçus fiscaux (Cerfa)
+
+Stripe collecte déjà le nom et l'adresse de chaque donateur. La génération automatique des reçus Cerfa n° 11580 sera branchée dès que l'on aura les informations de l'association : nom, numéro RNA ou SIREN, adresse, objet, et habilitation à délivrer des reçus.
+
+## 10. Développement local complet (optionnel)
 
 Avec Docker installé :
 

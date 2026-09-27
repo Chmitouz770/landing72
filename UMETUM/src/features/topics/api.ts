@@ -30,9 +30,7 @@ export function useTopicLabel() {
   return useCallback(
     (topic: Topic | null | undefined): string => {
       if (!topic) return '';
-      if (lang === 'he') return topic.name_he;
-      if (lang === 'en') return topic.name_en;
-      return topic.name_fr;
+      return topic.names?.[lang] ?? topic.names?.en ?? topic.name_en ?? topic.name_fr;
     },
     [lang],
   );

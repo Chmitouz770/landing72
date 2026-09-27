@@ -3,9 +3,9 @@
  * (PostgREST, Auth, Edge Functions) sur les données en mémoire de ./data.ts,
  * en reproduisant les règles d'accès (RLS) essentielles.
  */
-import type { Connection, Profile } from '@/types/database';
+import type { Connection, Profile, StudySession } from '@/types/database';
 
-import { AUTO_REPLY, db, DEMO_USER_ID, newId, type DemoTable } from './data';
+import { audienceFor, AUTO_REPLY, db, DEMO_USER_ID, newId, seedPersonalData, type DemoTable } from './data';
 
 type Row = Record<string, unknown>;
 
@@ -26,6 +26,15 @@ function isBlockedWith(other: unknown): boolean {
   return db.blocks.some(
     (b) => (b.blocker_id === ME && b.blocked_id === other) || (b.blocker_id === other && b.blocked_id === ME),
   );
+}
+
+function myGender() {
+  return db.profiles.find((p) => p.id === ME)?.gender ?? null;
+}
+
+function myAudience() {
+  const gender = myGender();
+  return gender ? audienceFor(gender) : null;
 }
 
 function myConnections(): Connection[] {
@@ -49,8 +58,18 @@ function simulateReplies() {
 function visible(table: DemoTable): Row[] {
   const connectionIds = new Set(myConnections().map((c) => c.id));
   switch (table) {
+    case 'profiles': {
+      const gender = myGender();
+      return db.profiles.filter((p) => p.id === ME || (gender !== null && p.gender === gender));
+    }
     case 'listings':
-      return db.listings.filter((l) => l.owner_id === ME || (l.status === 'active' && !isBlockedWith(l.owner_id)));
+      return db.listings.filter(
+        (l) =>
+          l.owner_id === ME ||
+          (l.status === 'active' && l.audience === myAudience() && !isBlockedWith(l.owner_id)),
+      );
+    case 'payouts':
+      return db.payouts.filter((p) => p.teacher_id === ME);
     case 'connections':
       return myConnections();
     case 'messages':
@@ -175,15 +194,17 @@ function withDefaults(table: DemoTable, input: Row): Row {
   switch (table) {
     case 'listings':
       return {
-        ...base, updated_at: nowIso(), status: 'active', level: 'all', format: 'video', audience: 'all',
+        ...base, updated_at: nowIso(), status: 'active', level: 'all', format: 'video',
         languages: ['fr'], description: null, city: null, availability: null, ...input, owner_id: ME,
+        audience: myAudience(),
       };
     case 'messages':
       return { ...base, ...input, sender_id: ME };
     case 'study_sessions':
       return {
-        ...base, updated_at: nowIso(), room_name: `umetum-demo-${base.id}`, status: 'scheduled', duration_minutes: 45,
-        mode: 'video', location: null, notes: null, ...input, created_by: ME,
+        ...base, updated_at: nowIso(), room_name: `umetum-demo-${base.id}`, duration_minutes: 45,
+        mode: 'video', location: null, notes: null, timezone: 'Europe/Paris', ...input, created_by: ME,
+        status: 'scheduled', teacher_confirmed_at: null, student_confirmed_at: null, payout_id: null,
       };
     case 'reports':
       return { ...base, status: 'open', ...input, reporter_id: ME };
@@ -205,7 +226,9 @@ function canWrite(table: DemoTable, row: Row): boolean {
 function rpc(name: string, args: Row): Response {
   if (name === 'request_connection') {
     const listing = db.listings.find((l) => l.id === args.p_listing_id && l.status === 'active');
-    if (!listing || isBlockedWith(listing.owner_id)) return pgError('listing_not_found');
+    if (!listing || isBlockedWith(listing.owner_id) || listing.audience !== myAudience()) {
+      return pgError('listing_not_found');
+    }
     if (listing.owner_id === ME) return pgError('cannot_request_own_listing');
     const open = db.connections.find(
       (c) => c.listing_id === listing.id && c.requested_by === ME && ['pending', 'accepted'].includes(c.status),
@@ -239,6 +262,21 @@ function rpc(name: string, args: Row): Response {
     }
     c.updated_at = nowIso();
     return json(c);
+  }
+
+  if (name === 'confirm_session') {
+    const session = visible('study_sessions').find((x) => x.id === args.p_session_id) as StudySession | undefined;
+    const connection = session && db.connections.find((c) => c.id === session.connection_id);
+    if (!session || !connection) return pgError('session_not_found');
+    if (session.status === 'cancelled') return pgError('session_cancelled');
+    if (new Date(session.starts_at).getTime() + session.duration_minutes * 60_000 > Date.now()) {
+      return pgError('session_not_ended');
+    }
+    if (connection.teacher_id === ME) session.teacher_confirmed_at ??= nowIso();
+    else session.student_confirmed_at ??= nowIso();
+    if (session.teacher_confirmed_at && session.student_confirmed_at) session.status = 'completed';
+    session.updated_at = nowIso();
+    return json(session);
   }
 
   if (name === 'block_user') {
@@ -365,6 +403,10 @@ export async function demoFetch(input: RequestInfo | URL, init?: RequestInit): P
   if (method === 'POST') {
     const inputs = (Array.isArray(body) ? body : [body]) as Row[];
     const created = inputs.map((input) => withDefaults(table, input));
+    if (table === 'listings' && !myAudience()) return pgError('gender_required');
+    if (table === 'study_sessions' && created.some((r) => new Date(String(r.starts_at)).getDay() === 6)) {
+      return pgError('shabbat');
+    }
     if (table === 'messages' || table === 'study_sessions') {
       const allowed = myConnections().some((c) => c.id === created[0]?.connection_id && c.status === 'accepted');
       if (!allowed) return pgError('new row violates row-level security policy', 403);
@@ -375,7 +417,22 @@ export async function demoFetch(input: RequestInfo | URL, init?: RequestInit): P
 
   if (method === 'PATCH') {
     const targets = applyQuery(visible(table), url.searchParams).filter((r) => canWrite(table, r));
-    for (const row of targets) Object.assign(row, body, 'updated_at' in row ? { updated_at: nowIso() } : {});
+    const patch = { ...body };
+    if (table === 'study_sessions') {
+      for (const key of ['teacher_confirmed_at', 'student_confirmed_at', 'payout_id']) delete patch[key];
+      if (patch.status === 'completed') delete patch.status;
+      if (patch.starts_at && new Date(String(patch.starts_at)).getDay() === 6) return pgError('shabbat');
+    }
+    for (const row of targets) {
+      if (table === 'study_sessions' && row.status === 'completed') continue;
+      if (table === 'profiles' && row.gender && patch.gender && patch.gender !== row.gender) {
+        return pgError('gender_locked', 403);
+      }
+      Object.assign(row, patch, 'updated_at' in row ? { updated_at: nowIso() } : {});
+      if (table === 'profiles' && row.id === ME && (row as Profile).gender) {
+        seedPersonalData((row as Profile).gender!);
+      }
+    }
     return wantsRows ? respondRows(table, targets, headers) : noContent();
   }
 

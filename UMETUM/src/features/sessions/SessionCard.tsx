@@ -4,12 +4,20 @@ import { useTranslation } from 'react-i18next';
 
 import { useUserId } from '@/features/auth/AuthProvider';
 import { relativeDayLabel } from '@/lib/dates';
+import { notify } from '@/lib/dialogs';
 import { formatTime } from '@/lib/format';
 import { useNow } from '@/lib/useNow';
 import { spacing, useTheme } from '@/theme';
 import { Avatar, Badge, Button, Card, Icon, Text } from '@/ui';
 
-import { canJoinSession, sessionPeer, type SessionWithPeople } from './api';
+import {
+  canJoinSession,
+  needsMyConfirmation,
+  sessionEnded,
+  sessionPeer,
+  useConfirmSession,
+  type SessionWithPeople,
+} from './api';
 
 type Props = {
   session: SessionWithPeople;
@@ -30,6 +38,13 @@ export function SessionCard({ session, showPeer = true, onCancel, compact }: Pro
   const isFuture = start.getTime() > now;
   const joinable = canJoinSession(session, now);
   const cancelled = session.status === 'cancelled';
+  const completed = session.status === 'completed';
+  const iAmTeacher = session.connection?.teacher_id === myId;
+  const toConfirm = needsMyConfirmation(session, myId, now);
+  const waitingOther = !completed && !cancelled && sessionEnded(session, now) && !toConfirm;
+  const confirmSession = useConfirmSession();
+  const confirm = () =>
+    confirmSession.mutate(session.id, { onError: () => notify(t('errors.generic')) });
   const join = () => router.push({ pathname: '/call/[sessionId]', params: { sessionId: session.id } });
 
   if (compact) {
@@ -95,6 +110,7 @@ export function SessionCard({ session, showPeer = true, onCancel, compact }: Pro
             />
             <Badge label={t('session.minutes', { count: session.duration_minutes })} />
             {cancelled ? <Badge label={t('session.cancelled')} tone="danger" /> : null}
+            {completed ? <Badge label={t('session.completed')} tone="success" icon="checkmark-circle" /> : null}
           </View>
           {session.mode === 'in_person' && session.location ? (
             <Text variant="small" tone="muted" numberOfLines={2}>
@@ -118,6 +134,26 @@ export function SessionCard({ session, showPeer = true, onCancel, compact }: Pro
       ) : session.mode === 'video' && !cancelled && isFuture ? (
         <Text variant="caption" tone="muted">
           {t('session.joinSoon')}
+        </Text>
+      ) : null}
+
+      {toConfirm ? (
+        <>
+          <Button
+            title={iAmTeacher ? t('session.confirmTeacher') : t('session.confirmStudent')}
+            icon="checkmark-done"
+            loading={confirmSession.isPending}
+            onPress={confirm}
+          />
+          {!iAmTeacher ? (
+            <Text variant="caption" tone="muted" center>
+              {t('session.confirmHint')}
+            </Text>
+          ) : null}
+        </>
+      ) : waitingOther ? (
+        <Text variant="caption" tone="muted">
+          {iAmTeacher ? t('session.waitingStudent') : t('session.waitingTeacher')}
         </Text>
       ) : null}
 

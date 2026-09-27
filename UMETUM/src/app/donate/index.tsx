@@ -3,21 +3,28 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import {
-  MIN_AMOUNT_CENTS,
-  openBillingPortal,
-  startDonation,
-  SUGGESTED_AMOUNTS,
-  useMyDonations,
-  useMySubscription,
-} from '@/features/donations/api';
+import { openBillingPortal, startDonation, useMyDonations, useMySubscription } from '@/features/donations/api';
+import { useFormattedRate } from '@/features/earnings/api';
+import { CURRENCIES, CURRENCY_CODES, detectCurrency, type CurrencyCode } from '@/lib/currency';
 import { notify } from '@/lib/dialogs';
-import { env } from '@/lib/env';
 import { currencySymbol, formatMoney, formatShortDate } from '@/lib/format';
 import { AppFunctionError } from '@/lib/supabase';
 import { spacing, useTheme } from '@/theme';
 import type { DonationKind } from '@/types/database';
-import { Badge, Button, Card, Chip, Field, Icon, Screen, Section, SegmentedControl, Text, TextField } from '@/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  Chip,
+  ChoiceChips,
+  Field,
+  Icon,
+  Screen,
+  Section,
+  SegmentedControl,
+  Text,
+  TextField,
+} from '@/ui';
 
 const CUSTOM = 'custom';
 
@@ -26,11 +33,12 @@ export default function Donate() {
   const { colors } = useTheme();
   const subscription = useMySubscription();
   const donations = useMyDonations();
-  const currency = env.defaultCurrency;
+  const rate = useFormattedRate();
 
   const hasSubscription = !!subscription.data;
+  const [currency, setCurrency] = useState<CurrencyCode>(detectCurrency);
   const [kind, setKind] = useState<DonationKind>('monthly');
-  const [preset, setPreset] = useState<number | typeof CUSTOM>(SUGGESTED_AMOUNTS.monthly[1]);
+  const [preset, setPreset] = useState<number | typeof CUSTOM>(CURRENCIES[currency].monthly[1]);
   const [custom, setCustom] = useState('');
   const [dedication, setDedication] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,12 +58,18 @@ export default function Donate() {
 
   const amountCents =
     preset === CUSTOM ? Math.round(Number(custom.replace(',', '.')) * 100) || 0 : preset * 100;
-  const validAmount = amountCents >= MIN_AMOUNT_CENTS;
+  const minAmount = CURRENCIES[currency].min;
+  const validAmount = amountCents >= minAmount;
   const amountLabel = formatMoney(Math.max(amountCents, 0), currency);
 
   const changeKind = (next: DonationKind) => {
     setKind(next);
-    setPreset(SUGGESTED_AMOUNTS[next][1]);
+    setPreset(CURRENCIES[currency][next][1]);
+  };
+
+  const changeCurrency = (next: CurrencyCode) => {
+    setCurrency(next);
+    setPreset(CURRENCIES[next][hasSubscription ? 'one_time' : kind][1]);
   };
 
   const give = async () => {
@@ -114,7 +128,7 @@ export default function Donate() {
         </>
       }
     >
-      <Text tone="muted">{t('donate.intro')}</Text>
+      <Text tone="muted">{t('donate.intro', { rate })}</Text>
 
       {subscription.data ? (
         <Card tone="accent">
@@ -149,9 +163,21 @@ export default function Donate() {
         />
       )}
 
+      <Field label={t('donate.currencyLabel')}>
+        <ChoiceChips
+          scroll
+          options={CURRENCY_CODES.map((code) => ({
+            value: code,
+            label: `${currencySymbol(code)} ${code.toUpperCase()}`,
+          }))}
+          value={currency}
+          onChange={changeCurrency}
+        />
+      </Field>
+
       <Field label={t('donate.amountLabel')}>
         <View style={styles.amounts}>
-          {SUGGESTED_AMOUNTS[effectiveKind].map((amount) => (
+          {CURRENCIES[currency][effectiveKind].map((amount) => (
             <Chip
               key={amount}
               label={formatMoney(amount * 100, currency)}
@@ -170,7 +196,7 @@ export default function Donate() {
             autoFocus
             error={
               custom && !validAmount
-                ? t('donate.minAmount', { amount: formatMoney(MIN_AMOUNT_CENTS, currency) })
+                ? t('donate.minAmount', { amount: formatMoney(minAmount, currency) })
                 : null
             }
           />

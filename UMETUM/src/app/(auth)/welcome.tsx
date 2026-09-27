@@ -3,16 +3,18 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useFormattedRate } from '@/features/earnings/api';
 import { spacing, useTheme } from '@/theme';
 import { Button, Icon, Screen, Text, type IconName } from '@/ui';
 
 export default function Welcome() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const rate = useFormattedRate();
 
   const points: { icon: IconName; text: string }[] = [
     { icon: 'search-outline', text: t('auth.point1') },
-    { icon: 'school-outline', text: t('auth.point2') },
+    { icon: 'school-outline', text: t('auth.point2', { rate }) },
     { icon: 'heart-outline', text: t('auth.point3') },
   ];
 

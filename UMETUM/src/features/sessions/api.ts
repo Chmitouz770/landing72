@@ -34,6 +34,22 @@ export function canJoinSession(session: StudySession, now = Date.now()): boolean
   return now >= start - JOIN_EARLY_MINUTES * 60_000 && now <= start + JOIN_LATE_HOURS * 3_600_000;
 }
 
+/** Erreur renvoyée par la base quand on planifie un samedi. */
+export function isShabbatError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as { message?: string }).message === 'shabbat';
+}
+
+/** La séance est terminée (heure de fin passée). */
+export function sessionEnded(session: StudySession, now = Date.now()): boolean {
+  return new Date(session.starts_at).getTime() + session.duration_minutes * 60_000 <= now;
+}
+
+/** La séance est finie et attend MA confirmation (enseignant ou élève). */
+export function needsMyConfirmation(session: SessionWithPeople, myId: string, now = Date.now()): boolean {
+  if (session.status !== 'scheduled' || !sessionEnded(session, now) || !session.connection) return false;
+  return session.connection.teacher_id === myId ? !session.teacher_confirmed_at : !session.student_confirmed_at;
+}
+
 export function sessionPeer(session: SessionWithPeople, myId: string): PersonLite | null {
   const c = session.connection;
   if (!c) return null;
@@ -91,6 +107,50 @@ export function useSession(id: string | undefined) {
   });
 }
 
+/** Séances terminées qui attendent ma confirmation (pour rémunérer l'enseignant). */
+export function useSessionsToConfirm() {
+  const myId = useUserId();
+  return useQuery({
+    queryKey: [...sessionKeys.all, 'to-confirm', myId],
+    enabled: !!myId,
+    queryFn: async (): Promise<SessionWithPeople[]> => {
+      const { data, error } = await supabase
+        .from('study_sessions')
+        .select(SESSION_SELECT)
+        .eq('status', 'scheduled')
+        .lte('starts_at', new Date().toISOString())
+        .order('starts_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data.filter((s) => needsMyConfirmation(s, myId));
+    },
+  });
+}
+
+export function useConfirmSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('confirm_session', { p_session_id: id });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: sessionKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['earnings'] });
+    },
+  });
+}
+
+/** Fuseau horaire de l'appareil (sert à appliquer la règle du Chabbat). */
+export function deviceTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jerusalem';
+  } catch {
+    return 'Asia/Jerusalem';
+  }
+}
+
 export type SessionDraft = {
   connectionId: string;
   startsAt: Date;
@@ -115,6 +175,7 @@ export function useCreateSession() {
           mode: draft.mode,
           location: draft.mode === 'in_person' ? draft.location?.trim() || null : null,
           notes: draft.notes?.trim() || null,
+          timezone: deviceTimezone(),
         })
         .select('*')
         .single();

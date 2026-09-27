@@ -18,6 +18,7 @@ import {
   LoadingView,
   MultiChoiceChips,
   Screen,
+  Text,
   TextField,
 } from '@/ui';
 
@@ -61,7 +62,7 @@ function EditProfileForm() {
         display_name: name.trim() || profile?.display_name,
         bio: bio.trim() || null,
         city: city.trim() || null,
-        gender,
+        ...(profile?.gender ? {} : { gender }),
         languages: languages.length > 0 ? languages : ['fr'],
         wants_to_learn: learn,
         wants_to_teach: teach,
@@ -100,7 +101,16 @@ function EditProfileForm() {
       <TextField label={t('onboarding.cityLabel')} value={city} onChangeText={setCity} maxLength={80} />
 
       <Field label={t('onboarding.genderTitle')}>
-        <ChoiceChips options={genderOptions(t)} value={gender} onChange={setGender} />
+        {profile?.gender ? (
+          <>
+            <Text>{t(`gender.${profile.gender}`)}</Text>
+            <Text variant="caption" tone="muted">
+              {t('profile.genderLocked')}
+            </Text>
+          </>
+        ) : (
+          <ChoiceChips options={genderOptions(t)} value={gender} onChange={setGender} />
+        )}
       </Field>
 
       <Field label={t('onboarding.languagesTitle')}>

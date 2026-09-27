@@ -3,7 +3,12 @@
 **La Torah, partout.** *Umetum* veut dire « partout » en yiddish.
 
 UMETUM met en relation les personnes qui veulent **étudier la Torah** et celles qui veulent **l'enseigner**, en présentiel ou en visio. Tout le monde peut être élève, enseignant, ou les deux.
-L'app est **gratuite**. Elle vit grâce aux **dons**, ponctuels ou mensuels : *« donne ton maasser en t'abonnant »*, du montant de ton choix.
+L'app est **gratuite** pour les élèves. Les **enseignants sont rémunérés 40 ₪ de l'heure**, grâce aux **dons** de la communauté, ponctuels ou mensuels : *« donne ton maasser en t'abonnant »*, du montant de ton choix.
+
+**Règles de la communauté**, imposées par la base de données :
+- **Pas de mixité** : les hommes étudient entre hommes, les femmes entre femmes. Chacun ne voit que les annonces et les profils de son genre.
+- **Rien le samedi** : l'app affiche « Chabbat Chalom » toute la journée, et aucune séance ne peut être planifiée un samedi.
+- **Heures payées seulement si l'élève confirme** que la séance a eu lieu, pour éviter les abus.
 
 ![Aperçu de l'app](docs/screenshots/apercu.png)
 ![Aperçu de l'app (suite)](docs/screenshots/apercu-2.png)
@@ -13,16 +18,17 @@ L'app est **gratuite**. Elle vit grâce aux **dons**, ponctuels ou mensuels : *�
 | | |
 |---|---|
 | **Connexion sans mot de passe** | Un code à 6 chiffres est envoyé par e-mail. |
-| **Onboarding en 3 étapes** | Prénom, langues, ville, puis « apprendre / enseigner / les deux ». |
-| **Annonces** | « Je propose un cours » ou « Je cherche un cours », publiées en une minute : matière, format (visio / présentiel), niveau, public (tout public, entre hommes, entre femmes), langues, disponibilités. |
-| **Explorer** | Cours proposés et élèves qui cherchent, avec recherche et filtres par matière et par format. Les annonces réservées à l'autre public sont masquées automatiquement. |
+| **Onboarding en 3 étapes** | Prénom et genre (définitif), langues, ville, puis « apprendre / enseigner / les deux ». |
+| **Annonces** | « Je propose un cours » ou « Je cherche un cours », publiées en une minute : matière, format (visio / présentiel), niveau, langues, disponibilités. |
+| **Explorer** | Cours proposés et élèves qui cherchent, avec recherche et filtres par matière et par format. Uniquement des membres du même genre. |
 | **Mise en relation** | Un bouton pour faire une demande, un autre pour accepter ou refuser. Le rôle (enseignant ou élève) est déduit de l'annonce. |
 | **Chat en temps réel** | Il s'ouvre dès que la demande est acceptée. |
-| **Séances** | Planification en 3 touches (jour, heure, durée), en visio ou en présentiel. Pas de séance proposée le Chabbat. |
+| **Séances** | Planification en 3 touches (jour, heure, durée), en visio ou en présentiel. Jamais le samedi. Après chaque séance, l'enseignant et l'élève la confirment. |
+| **Rémunération des enseignants** | Écran « Mes gains » : tarif (40 ₪/h, réglable en base), heures validées du mois, montant à recevoir, historique des versements. L'association verse chaque mois (voir docs/SETUP.md). |
 | **Visio intégrée** | LiveKit, en natif sur iOS et Android et dans le navigateur. Bouton « Visio maintenant » pour lancer un appel tout de suite. |
-| **Dons** | Maasser mensuel au montant libre ou don ponctuel, avec dédicace (*leïlouy nichmat*, *refoua chelema*…), paiement Stripe, portail pour gérer ou arrêter l'abonnement, historique des dons. |
+| **Dons** | Maasser mensuel au montant libre ou don ponctuel, avec dédicace (*leïlouy nichmat*, *refoua chelema*…). La devise est détectée selon le pays (€, $, £, ₪, CA$, A$, CHF, R, R$, MX$) et reste modifiable. Paiement Stripe avec l'adresse du donateur (pour les reçus Cerfa), portail pour gérer ou arrêter l'abonnement, historique des dons. |
 | **Sécurité** | Signalement d'une annonce ou d'un profil, suppression du compte depuis l'app, règles d'accès en base (RLS). |
-| **Langues** | Français, anglais, hébreu (de droite à gauche), mode clair et mode sombre. |
+| **Langues** | Français, anglais, hébreu et yiddish (de droite à gauche), russe, espagnol, portugais, italien, allemand. Mode clair et mode sombre. |
 
 ## Stack technique
 

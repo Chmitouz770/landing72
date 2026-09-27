@@ -1,13 +1,7 @@
 // Crée une page de paiement Stripe Checkout pour un don ponctuel
 // ou un « maasser » mensuel (abonnement au montant libre).
 import { HttpError, json, readJson, serve } from '../_shared/http.ts';
-import {
-  getOrCreateCustomer,
-  siteUrl,
-  stripe,
-  SUPPORTED_CURRENCIES,
-  type Stripe,
-} from '../_shared/stripe.ts';
+import { getOrCreateCustomer, MIN_AMOUNT_CENTS, siteUrl, stripe, type Stripe } from '../_shared/stripe.ts';
 import { adminClient, requireUser } from '../_shared/supabase.ts';
 
 type Body = {
@@ -17,8 +11,7 @@ type Body = {
   dedication?: string;
 };
 
-const MIN_AMOUNT_CENTS = 100;
-const MAX_AMOUNT_CENTS = 1_000_000;
+const MAX_AMOUNT_CENTS = 10_000_000;
 
 serve(async (req) => {
   const { user } = await requireUser(req);
@@ -27,19 +20,18 @@ serve(async (req) => {
   const kind = body.kind;
   if (kind !== 'one_time' && kind !== 'monthly') throw new HttpError(400, 'invalid_kind');
 
+  const currency = (body.currency ?? 'eur').toLowerCase();
+  const minimum = MIN_AMOUNT_CENTS[currency];
+  if (minimum === undefined) throw new HttpError(400, 'invalid_currency');
+
   const amount = body.amountCents;
   if (
     typeof amount !== 'number' ||
     !Number.isInteger(amount) ||
-    amount < MIN_AMOUNT_CENTS ||
+    amount < minimum ||
     amount > MAX_AMOUNT_CENTS
   ) {
     throw new HttpError(400, 'invalid_amount');
-  }
-
-  const currency = (body.currency ?? 'eur').toLowerCase();
-  if (!(SUPPORTED_CURRENCIES as readonly string[]).includes(currency)) {
-    throw new HttpError(400, 'invalid_currency');
   }
 
   const dedication = body.dedication?.trim().slice(0, 200) ?? '';
@@ -65,6 +57,8 @@ serve(async (req) => {
     success_url: `${site}/donate/thanks?kind=${kind}`,
     cancel_url: `${site}/donate`,
     locale: 'auto',
+    // Nom et adresse du donateur : nécessaires pour les reçus fiscaux (Cerfa).
+    billing_address_collection: 'required',
     metadata,
   };
 

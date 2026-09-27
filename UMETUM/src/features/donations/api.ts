@@ -6,14 +6,6 @@ import { useUserId } from '@/features/auth/AuthProvider';
 import { invokeFunction, supabase } from '@/lib/supabase';
 import type { Donation, DonationKind, Subscription } from '@/types/database';
 
-/** Montants suggérés (en unités) — multiples de 18 (« Haï », la vie). */
-export const SUGGESTED_AMOUNTS: Record<DonationKind, number[]> = {
-  monthly: [18, 36, 54, 100],
-  one_time: [36, 72, 180, 360],
-};
-
-export const MIN_AMOUNT_CENTS = 100;
-
 export const donationKeys = {
   subscription: (userId: string) => ['donations', 'subscription', userId] as const,
   history: (userId: string) => ['donations', 'history', userId] as const,

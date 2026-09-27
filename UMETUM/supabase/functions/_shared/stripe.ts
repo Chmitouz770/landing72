@@ -18,7 +18,22 @@ export function siteUrl(): string {
   return requireEnv('PUBLIC_SITE_URL').replace(/\/$/, '');
 }
 
-export const SUPPORTED_CURRENCIES = ['eur', 'ils', 'usd', 'gbp', 'chf', 'cad'] as const;
+/**
+ * Devises acceptées et montant minimum (en centimes) pour chacune.
+ * Garder en phase avec src/lib/currency.ts côté app.
+ */
+export const MIN_AMOUNT_CENTS: Record<string, number> = {
+  eur: 100,
+  usd: 100,
+  gbp: 100,
+  ils: 500,
+  cad: 100,
+  aud: 100,
+  chf: 100,
+  zar: 2000,
+  brl: 500,
+  mxn: 2000,
+};
 
 /** Retrouve (ou crée) le client Stripe associé à un utilisateur UMETUM. */
 export async function getOrCreateCustomer(admin: SupabaseClient, user: User): Promise<string> {

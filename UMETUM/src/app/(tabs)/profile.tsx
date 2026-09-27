@@ -47,6 +47,9 @@ export default function Profile() {
           label={t('profile.myListings')}
           onPress={() => router.push({ pathname: '/user/[id]', params: { id: profile.id } })}
         />
+        {profile.wants_to_teach ? (
+          <ListRow icon="wallet-outline" label={t('profile.earnings')} onPress={() => router.push('/earnings')} />
+        ) : null}
         <ListRow icon="heart-outline" label={t('profile.support')} onPress={() => router.push('/donate')} />
         <ListRow icon="settings-outline" label={t('profile.settings')} onPress={() => router.push('/settings')} />
         <ListRow icon="log-out-outline" label={t('profile.signOut')} onPress={signOut} danger />

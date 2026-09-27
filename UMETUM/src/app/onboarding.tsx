@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { genderOptions, languageOptions, STUDY_LANGUAGES, type StudyLanguage } from '@/features/listings/options';
+import { useFormattedRate } from '@/features/earnings/api';
 import { useMyProfile, useUpdateProfile } from '@/features/profile/api';
 import { notify } from '@/lib/dialogs';
 import { radius, spacing, useTheme } from '@/theme';
@@ -31,6 +32,7 @@ export default function Onboarding() {
   const { t } = useTranslation();
   const { data: profile } = useMyProfile();
   const update = useUpdateProfile();
+  const rate = useFormattedRate();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState(profile?.display_name ?? '');
@@ -41,7 +43,7 @@ export default function Onboarding() {
   const [teach, setTeach] = useState(false);
 
   const canContinue =
-    (step === 0 && name.trim().length > 0) ||
+    (step === 0 && name.trim().length > 0 && gender !== null) ||
     (step === 1 && languages.length > 0) ||
     (step === 2 && (learn || teach));
 
@@ -137,7 +139,7 @@ export default function Onboarding() {
           <IntentOption
             icon="school-outline"
             title={t('onboarding.intentTeach')}
-            description={t('onboarding.intentTeachDesc')}
+            description={t('onboarding.intentTeachDesc', { rate })}
             selected={teach}
             onPress={() => setTeach(!teach)}
           />

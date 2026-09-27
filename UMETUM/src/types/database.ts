@@ -51,6 +51,8 @@ type TopicRow = {
   icon: string;
   sort_order: number;
   is_active: boolean;
+  /** Nom dans chaque langue de l'app : { fr, en, he, yi, ru, es, pt, it, de }. */
+  names: Record<string, string>;
 };
 
 type ListingRow = {
@@ -103,7 +105,31 @@ type StudySessionRow = {
   room_name: string;
   status: SessionStatus;
   notes: string | null;
+  /** Fuseau horaire de la personne qui a planifié (règle du Chabbat). */
+  timezone: string;
+  teacher_confirmed_at: Timestamp | null;
+  student_confirmed_at: Timestamp | null;
+  payout_id: string | null;
   created_at: Timestamp;
+  updated_at: Timestamp;
+};
+
+type PayoutRow = {
+  id: string;
+  teacher_id: string | null;
+  period_start: string;
+  minutes: number;
+  amount_cents: number;
+  currency: string;
+  status: 'pending' | 'paid';
+  paid_at: Timestamp | null;
+  reference: string | null;
+  created_at: Timestamp;
+};
+
+type AppSettingRow = {
+  key: string;
+  value: Record<string, unknown>;
   updated_at: Timestamp;
 };
 
@@ -197,12 +223,27 @@ export type Database = {
         Insert: Partial<StudySessionRow> &
           Pick<StudySessionRow, 'connection_id' | 'created_by' | 'starts_at'>;
         Update: Partial<
-          Pick<StudySessionRow, 'starts_at' | 'duration_minutes' | 'mode' | 'location' | 'status' | 'notes'>
+          Pick<
+            StudySessionRow,
+            'starts_at' | 'duration_minutes' | 'mode' | 'location' | 'status' | 'notes' | 'timezone'
+          >
         >;
         Relationships: [
           FK<'study_sessions_connection_id_fkey', 'connection_id', 'connections'>,
           FK<'study_sessions_created_by_fkey', 'created_by', 'profiles'>,
         ];
+      };
+      payouts: {
+        Row: PayoutRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      app_settings: {
+        Row: AppSettingRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
       };
       subscriptions: {
         Row: SubscriptionRow;
@@ -236,6 +277,10 @@ export type Database = {
         Args: { p_listing_id: string; p_message?: string | null };
         Returns: ConnectionRow;
       };
+      confirm_session: {
+        Args: { p_session_id: string };
+        Returns: StudySessionRow;
+      };
       block_user: {
         Args: { p_user_id: string };
         Returns: undefined;
@@ -261,3 +306,4 @@ export type Message = Tables<'messages'>;
 export type StudySession = Tables<'study_sessions'>;
 export type Subscription = Tables<'subscriptions'>;
 export type Donation = Tables<'donations'>;
+export type Payout = Tables<'payouts'>;
